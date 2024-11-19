@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "private": true,
+  "main": "app.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --inspect dist/app.js",
+    "start": "node dist/app.js"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.7",
+    "cors": "^2.8.5",
+    "debug": "~4.3.7",
+    "dotenv": "^16.4.5",
+    "express": "5.0.0",
+    "morgan": "~1.10.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.9.0",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.6.3"
+  }
+}
