@@ -1,4 +1,4 @@
 # ghor-kalyug
-CS 696A Project 
+CS 696A Project Repository
 
 
