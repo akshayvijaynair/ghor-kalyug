@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import express from 'express';
+import { generateQuiz } from '../controllers/quizController';
 
-const router = Router();
+const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.send('Welcome to the Index Route!');
-});
+router.post('/quiz/generate', generateQuiz);
 
 export default router;
+
