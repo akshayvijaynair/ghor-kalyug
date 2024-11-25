@@ -17,7 +17,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-const port = 5000;
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-});
+export default app;
