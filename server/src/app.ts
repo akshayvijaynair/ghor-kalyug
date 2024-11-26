@@ -1,21 +1,34 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import routes from './routes';
+import cors from 'cors';
+import connectDB from './config/database';
+import quizRoutes from './routes/quizRoutes';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URI!)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((error) => console.error('MongoDB connection error:', error));
+// Connect to MongoDB
+connectDB();
 
-app.use('/api', routes);
+// Routes
+app.use('/api/quizzes', quizRoutes);
 
-export default app;
+// Global error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Something went wrong',
+    message: err.message
+  });
+});
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

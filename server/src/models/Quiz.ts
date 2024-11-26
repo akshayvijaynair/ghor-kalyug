@@ -25,4 +25,3 @@ const QuizSchema = new Schema({
 });
 
 export default mongoose.model<IQuiz>('Quiz', QuizSchema);
-
