@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
-import Login from "./Login"; // Import the Login component
-//import Register from "./Register"; // Import the Register component
+import Login from "./Login"; 
+import Register from "./Register";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -55,7 +55,7 @@ function App() {
         />
         {/* Login and Register Routes */}
         <Route path="/login" element={<Login />} />
-        {/* <Route path="/register" element={<Register />} /> */}
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );
