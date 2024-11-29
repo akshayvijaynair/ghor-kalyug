@@ -5,13 +5,13 @@ import { setLogLevel } from "firebase/firestore";
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBDOO-k008k7DIISIyr-1AzT3uK8jMVaoM",
-    authDomain: "ghor-kalyug.firebaseapp.com",
-    projectId: "ghor-kalyug",
-    storageBucket: "ghor-kalyug.firebasestorage.app",
-    messagingSenderId: "934734027946",
-    appId: "1:934734027946:web:80be4718db8a283f6704d3",
-    measurementId: "G-4CT335C3ZL"
+    apiKey: import.meta.env.apiKey,
+    authDomain: import.meta.env.authDomain,
+    projectId: import.meta.env.projectId,
+    storageBucket: import.meta.env.storageBucket,
+    messagingSenderId: import.meta.env.messagingSenderId,
+    appId: import.meta.env.appId,
+    measurementId: import.meta.env.measurementId
   };
   
 setLogLevel("debug");
