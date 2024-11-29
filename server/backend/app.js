@@ -18,6 +18,14 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 // Temporary storage for quizzes
 let storedQuiz = [];
 
+// Helper function to sanitize input
+const sanitizeInput = (input) => {
+  return input
+    .trim()
+    .replace(/[\n\r]/g, "\\n") // Replace newline characters
+    .replace(/"/g, '\\"'); // Escape double quotes
+};
+
 // Route to generate quiz
 app.post("/generate", async (req, res) => {
   const { topic, courseMaterial } = req.body;
@@ -29,10 +37,12 @@ app.post("/generate", async (req, res) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Construct prompt
+    const sanitizedTopic = sanitizeInput(topic);
+    const sanitizedCourseMaterial = sanitizeInput(courseMaterial);
+
     const prompt = `
-      Topic: ${topic}
-      Course Material: ${courseMaterial}
+      Topic: ${sanitizedTopic}
+      Course Material: ${sanitizedCourseMaterial}
 
       Create a quiz based on the topic and course material above. Include 5 multiple-choice questions. 
       Each question must have 4 options, with the correct answer clearly indicated.
@@ -40,34 +50,29 @@ app.post("/generate", async (req, res) => {
 
     console.log("Sending prompt to Gemini API:", prompt);
 
-    // Call the API
     const result = await model.generateContent({
       prompt,
       temperature: 0.7,
-      maxTokens: 4024,
+      maxTokens: 1024,
     });
 
-    // Debug the response
-    console.log("Gemini API response:", result);
-
-    // Validate response
-    if (!result || !result.response || !result.response.text) {
+    if (!result || !result.response || typeof result.response.text !== "string") {
       console.error("Invalid response from Gemini API:", result);
       return res.status(500).json({ error: "Failed to generate quiz. Invalid API response." });
     }
 
-    // Parse the response
     const quizContent = result.response.text;
     console.log("Raw quiz content:", quizContent);
 
-    // Parse and format the quiz
     const formattedQuiz = parseQuiz(quizContent);
-    storedQuiz = formattedQuiz; // Store the quiz temporarily
+    storedQuiz = formattedQuiz;
 
     res.status(200).json({ quiz: formattedQuiz });
   } catch (error) {
     console.error("Error generating quiz:", error);
-    res.status(500).json({ error: "Failed to generate quiz. Please try again." });
+    res.status(500).json({
+      error: "An internal error occurred while generating the quiz. Please try again later.",
+    });
   }
 });
 
@@ -75,8 +80,12 @@ app.post("/generate", async (req, res) => {
 app.post("/submit", (req, res) => {
   const { answers } = req.body;
 
-  if (!storedQuiz.length || !answers || answers.length !== storedQuiz.length) {
-    return res.status(400).json({ error: "Invalid answers or quiz not available." });
+  if (!storedQuiz || storedQuiz.length === 0) {
+    return res.status(400).json({ error: "No quiz available for submission." });
+  }
+
+  if (!answers || answers.length !== storedQuiz.length) {
+    return res.status(400).json({ error: "Invalid or incomplete answers provided." });
   }
 
   let score = 0;
@@ -97,10 +106,15 @@ app.post("/submit", (req, res) => {
 
 // Function to parse and format the quiz
 function parseQuiz(quizText) {
+  if (!quizText || typeof quizText !== "string") {
+    console.error("Invalid quiz text received for parsing:", quizText);
+    return [];
+  }
+
   const questions = quizText.split("\n\n").filter((q) => q.trim());
   return questions.map((q, index) => {
     const [question, ...options] = q.split("\n");
-    const correctOption = options.find((option) => option.startsWith("*")); // Correct answers marked with '*'
+    const correctOption = options.find((option) => option.startsWith("*"));
     return {
       id: index + 1,
       question: question.trim(),
