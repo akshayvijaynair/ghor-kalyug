@@ -1,85 +1,62 @@
-import { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import React, { useState } from "react";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-import { auth} from "./firebaseConfig"
+import { app } from "./firebaseConfig";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 
-const Register = () => {
-  const [email, setEmail] = useState("");
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const Register: React.FC = () => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate(); // Initialize navigation hook
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async () => {
     try {
-      const db = getFirestore();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      // Update user's display name
-      await updateProfile(userCredential.user, {
-        displayName: username,
-      });
-
-      // Save username and email mapping in Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
+      // Store username and email in Firestore
+      await setDoc(doc(db, "users", user.uid), {
         username,
         email,
       });
 
-      console.log("User registered:", userCredential.user);
-      alert("Registration successful!");
-      navigate("/login");
+      setMessage("User successfully registered!");
+      setTimeout(() => {
+        navigate("/login"); // Redirect to the login page after 5 seconds
+      }, 5000);
     } catch (error: any) {
-      console.error("Error registering:", error.message);
-      alert("Error registering: " + error.message);
+      setMessage(`Error: ${error.message}`);
     }
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            Username:
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              style={{ width: "100%", padding: "8px" }}
-            />
-          </label>
-        </div>
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            Email:
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{ width: "100%", padding: "8px" }}
-            />
-          </label>
-        </div>
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{ width: "100%", padding: "8px" }}
-            />
-          </label>
-        </div>
-        <button type="submit" style={{ padding: "10px 20px" }}>
-          Register
-        </button>
-      </form>
+    <div>
+      <h1>Register</h1>
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleRegister}>Register</button>
+      <p>{message}</p>
     </div>
   );
 };
