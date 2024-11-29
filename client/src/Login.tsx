@@ -4,7 +4,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState(""); // Can be username or email
+  const [identifier, setIdentifier] = useState(""); 
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
