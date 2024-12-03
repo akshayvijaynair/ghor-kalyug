@@ -30,7 +30,9 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY);
  */
 
 // Route to generate a quiz
-app.post("/generate-quiz", async (req, res) => {
+import { Request, Response } from "express";
+
+app.post("/generate-quiz", async (req: Request, res: Response) => {
   const { topic } = req.body;
 
   // Validate input
@@ -77,7 +79,7 @@ app.post("/generate-quiz", async (req, res) => {
  * @param {string} quizText 
  * @returns {QuizQuestion[]}
  */
-function parseQuiz(quizText) {
+function parseQuiz(quizText: string) {
   if (!quizText || typeof quizText !== "string") {
     throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
   }
