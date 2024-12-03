@@ -1,3 +1,11 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { Box } from '@mui/material';
+import Header from './Components/Header';
+import Home from './Pages/Home';
+import theme from './theme';
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Container, Navbar, Nav, Button } from "react-bootstrap";
@@ -8,9 +16,41 @@ import Login from "./Login";
 import Register from "./Register";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+            width: '100vw',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            bgcolor: '#FFFFFF'
+          }}
+        >
+          <Header />
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              alignItems: 'stretch',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              {/* <Route path="/login" element={<Login />} /> */}
+              {/* <Route path="/register" element={<Register />} /> */}
+            </Routes>
+          </Box>
+        </Box>
+      </Router>
+    </ThemeProvider>
     <Router>
       <Navbar bg="dark" variant="dark" expand="lg">
         <Container>
@@ -22,7 +62,7 @@ function App() {
           </Nav>
         </Container>
       </Navbar>
-      
+
       <Routes>
         {/* Home Route */}
         <Route
@@ -59,3 +99,4 @@ function App() {
 }
 
 export default App;
+
