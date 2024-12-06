@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import {GoogleGenerativeAI} from "@google/generative-ai";
 import {DifficultyLevel} from "./enums/generate-quiz";
-import schema from "./schema";
+import quizResponseSchema from "./schema";
 
 // Configure environment variables
 dotenv.config();
@@ -39,13 +39,13 @@ app.post("/generate-quiz", async (req, res) => {
         const difficultyLevel = DifficultyLevel[difficulty]
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b", generationConfig:{
                 responseMimeType: "application/json",
-                responseSchema: schema,
+                responseSchema: quizResponseSchema,
+                temperature: 0.1,
             } });
         const result = await model.generateContent(`
 Topic: ${topicString}
 Generate ${numQuestions} multiple-choice questions based on the topics above at a difficulty level of ${difficultyLevel}.
 Each question must have exactly 4 options.
-Do not include the correct answer in the output.
 Format each question with the question text first, followed by options on new lines.
 Ensure each question is clearly separated and follows this format:
 
@@ -54,6 +54,7 @@ Option 1
 Option 2
 Option 3
 Option 4
+Answer
         `);
 
         const quizContent = result.response.text();

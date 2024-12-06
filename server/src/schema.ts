@@ -1,6 +1,6 @@
 import { SchemaType } from "@google/generative-ai";
 
-const schema = {
+const quizResponseSchema = {
     description: "List of quiz questions",
     type: SchemaType.ARRAY,
     items: {
@@ -39,9 +39,14 @@ const schema = {
                 nullable: false,
                 maxItems: 4,
             },
+            answer: {
+                type: SchemaType.STRING,
+                description: "Key of the correct option",
+                nullable: false,
+            }
         },
-        required: ["question", "options"],
+        required: ["question", "options", "answer"], // Added 'answer' to required fields
     },
 };
 
-export default schema;
+export default quizResponseSchema;
