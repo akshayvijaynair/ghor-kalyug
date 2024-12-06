@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import {Question} from "../types/generate-quiz.tsx";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   background: theme.palette.background.paper,
@@ -36,11 +37,6 @@ const ProgressButton = styled(Button)<{ completed?: boolean }>(({ theme, complet
   },
 }));
 
-interface Question {
-  questionId: string;
-  questionText: string;
-  options: string[];
-}
 
 interface QuizProps {
   questions: Question[];
@@ -94,7 +90,7 @@ const Quiz: React.FC<QuizProps> = ({ questions }) => {
       <StyledCard elevation={4}>
         <CardContent sx={{ p: 4 }}>
           <Typography variant="h5" gutterBottom>
-            {questions[currentQuestion].questionText}
+            {questions[currentQuestion].question}
           </Typography>
           <FormControl component="fieldset">
             <RadioGroup
@@ -104,9 +100,9 @@ const Quiz: React.FC<QuizProps> = ({ questions }) => {
               {questions[currentQuestion].options.map((option, index) => (
                 <FormControlLabel
                   key={index}
-                  value={index}
+                  value={option.key}
                   control={<Radio />}
-                  label={option}
+                  label={option.value}
                 />
               ))}
             </RadioGroup>
