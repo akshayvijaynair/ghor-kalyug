@@ -1,7 +1,9 @@
-const dotenv = require("dotenv");
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import {GoogleGenerativeAI} from "@google/generative-ai";
+import {DifficultyLevel} from "./enums/generate-quiz";
+import schema from "./schema";
 
 // Configure environment variables
 dotenv.config();
@@ -22,30 +24,36 @@ if (!process.env.API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 // Route to generate a quiz
+// @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
-    const { topic } = req.body;
+    const { topics, difficulty, numQuestions } = req.body;
 
     // Validate input
-    if (!topic || typeof topic !== "string") {
-        return res.status(400).json({ error: "Topic is required and must be a string." });
+    if (!Array.isArray(topics) || !difficulty || !numQuestions) {
+        return res.status(400).json({ error: "Invalid input." });
     }
 
     try {
         // Create generative model and generate content
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const topicString = topics.join(", ");
+        const difficultyLevel = DifficultyLevel[difficulty]
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b", generationConfig:{
+                responseMimeType: "application/json",
+                responseSchema: schema,
+            } });
         const result = await model.generateContent(`
-Topic: ${topic}
-Generate 20 multiple-choice questions based on the topic above.
+Topic: ${topicString}
+Generate ${numQuestions} multiple-choice questions based on the topics above at a difficulty level of ${difficultyLevel}.
 Each question must have exactly 4 options.
 Do not include the correct answer in the output.
 Format each question with the question text first, followed by options on new lines.
 Ensure each question is clearly separated and follows this format:
 
 Question text?
-A. Option 1
-B. Option 2
-C. Option 3
-D. Option 4
+Option 1
+Option 2
+Option 3
+Option 4
         `);
 
         const quizContent = result.response.text();
@@ -64,52 +72,20 @@ D. Option 4
  * @param {string} quizText - Raw quiz content
  * @returns {Array} - Parsed questions
  */
-function parseQuiz(quizText) {
+function parseQuiz(quizText: string) {
     if (!quizText || typeof quizText !== "string") {
         throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
     }
-
-    // More robust splitting to handle various potential formatting issues
-    const questionBlocks = quizText
-        .split(/\n\n+/)  // Split by multiple newlines
-        .filter((block) => /^\d*\.*\s*[\w\s]+\?/i.test(block.trim()));  // Ensure block looks like a question
-
-    const parsedQuestions = [];
-
-    questionBlocks.forEach((block, index) => {
-        try {
-            // Split block into lines, removing any empty lines
-            const lines = block.split("\n").filter((line) => line.trim());
-
-            // Extract question (first line)
-            const questionText = lines[0].replace(/^\d*\.*\s*/, '').trim();
-
-            // Extract options (next 4 lines)
-            const options = lines.slice(1, 5)
-                .map((option) => option.replace(/^[A-D]\.\s*/, "").trim())
-                .filter(option => option);  // Remove any empty options
-
-            // Validate we have exactly 4 options
-            if (options.length !== 4) {
-                console.warn(`Question ${index + 1} does not have exactly 4 options`);
-                return;  // Skip this question
-            }
-
-            parsedQuestions.push({
-                questionId: `q${parsedQuestions.length + 1}`,
-                questionText,
-                options,
-            });
-        } catch (parseError) {
-            console.error(`Error parsing question block: ${block}`, parseError);
+    try {
+        const parsedQuestions = JSON.parse(quizText);
+        if (parsedQuestions.length === 0) {
+            throw new Error("No valid questions could be parsed from the quiz content");
         }
-    });
-
-    if (parsedQuestions.length === 0) {
-        throw new Error("No valid questions could be parsed from the quiz content");
+        return parsedQuestions;
+    }catch (parseError) {
+        console.error(`Error parsing question block: ${parseError}`);
+        return []
     }
-
-    return parsedQuestions;
 }
 
 // Server configuration
