@@ -1,38 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  alpha,
-  CircularProgress,
-} from '@mui/material';
+import {Box, Typography, Button, CardContent, CircularProgress} from '@mui/material';
 import { ArrowForward, Chat } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import Quiz from '../components/Quiz'; // Update the path if needed
-
-const StyledCard = styled(Card)(({ theme }) => ({
-  background: alpha(theme.palette.background.paper, 0.8),
-  backdropFilter: 'blur(10px)',
-  maxWidth: '500px',
-  width: '100%',
-  marginTop: theme.spacing(4),
-}));
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: theme.shape.borderRadius * 2,
-    backgroundColor: alpha(theme.palette.background.paper, 0.6),
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.background.paper, 0.8),
-    },
-    '&.Mui-focused': {
-      backgroundColor: alpha(theme.palette.background.paper, 0.8),
-    },
-  },
-}));
+import Quiz from '@components/Quiz';
+import StyledCard from '@components/StyledCard'
+import StyledTextField from '@components/StyledTextField';
 
 const Home: React.FC = () => {
   const [subject, setSubject] = useState('');
