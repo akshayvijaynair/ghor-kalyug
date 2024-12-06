@@ -34,10 +34,10 @@ const Header: React.FC = () => {
           Ghor Kalyug
         </Typography>
         <Box>
-          <NavButton component={RouterLink} to="/">
+          <NavButton component={RouterLink} to="/home">
             Home
           </NavButton>
-          <NavButton component={RouterLink} to="/login">
+          <NavButton component={RouterLink} to="/">
             Login
           </NavButton>
           <NavButton component={RouterLink} to="/register">
