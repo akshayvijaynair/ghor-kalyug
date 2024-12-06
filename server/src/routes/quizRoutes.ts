@@ -4,15 +4,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const router = express.Router();
 const genAI = new GoogleGenerativeAI(process.env.API_KEY || "");
 
+interface QuizRequestBody {
+  topics: string[];
+  difficulty: number;
+  numQuestions: number;
+}
+
 /**
  * POST /quizzes
  * Generate quiz questions using Gemini API
  */
-router.post("/", async (req: Request, res: Response) => {
-  const { courseId, topics, difficulty, numQuestions } = req.body;
+// @ts-ignore
+router.post("/", async (req: Request<{}, {}, QuizRequestBody>, res: Response) => {
+  const { topics, difficulty, numQuestions } = req.body;
 
   // Validate input
-  if (!courseId || !Array.isArray(topics) || !difficulty || !numQuestions) {
+  if (!Array.isArray(topics) || !difficulty || !numQuestions) {
     return res.status(400).json({ error: "Invalid input." });
   }
 
@@ -67,6 +74,7 @@ router.post("/", async (req: Request, res: Response) => {
  * POST /quizzes/:quizId/answers
  * Submit answers and calculate the score
  */
+// @ts-ignore
 router.post("/:quizId/answers", async (req: Request, res: Response) => {
   const { quizId } = req.params;
   const { answers, correctAnswers } = req.body;
@@ -114,6 +122,6 @@ function parseQuestions(quizText: string) {
       correctAnswer,
     };
   });
-});
+}
 
 export default router;
