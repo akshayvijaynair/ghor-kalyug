@@ -12,8 +12,8 @@ Here’s an API design proposal for the described quiz application requirements.
 
 ### **1. Student-Focused APIs**
 
-#### 1.1 Quiz Creation
-**Endpoint:** `POST /quizzes`  
+#### 1.1 Quiz Generation
+**Endpoint:** `POST /generate-quiz`  
 **Description:** Allows students to create quizzes by selecting topics, difficulty levels, and the number of questions.  
 **Request Body:**
 ```json
@@ -25,11 +25,17 @@ Here’s an API design proposal for the described quiz application requirements.
 }
 ```
 **Response:**
+
 ```json
 {
-  "quizId": "string",
-  "status": "success",
-  "message": "Quiz created successfully."
+  "quiz": {
+    "questionId": "string",
+    "question": "string",
+    "options": [
+      {"key":"string", "value":"string"} 
+    ],
+    "answer": "string"
+  }
 }
 ```
 
