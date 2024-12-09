@@ -85,7 +85,7 @@ router.post("/:quizId/answers", async (req: Request, res: Response) => {
 
   // Calculate score and feedback
   const feedback = answers.map((answer) => {
-    const correct = correctAnswers.find((c) => c.questionId === answer.questionId);
+    const correct = correctAnswers.find((c: { questionId: any; }) => c.questionId === answer.questionId);
     return {
       questionId: answer.questionId,
       isCorrect: correct?.correctAnswer === answer.selectedOption,
