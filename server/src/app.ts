@@ -7,6 +7,7 @@ import {DifficultyLevel} from "./enums/generate-quiz";
 import quizResponseSchema from "./schema";
 import getPrompt from "./gemini";
 import {QuizResponse} from "./entity/quizResponseSchema";
+import db from "./db/connection.js"; // Import the db connection here
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ if (!process.env.API_KEY) {
     process.exit(1);
 }
 
+// Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 mongoose.connect(process.env.MONGO_DB_URI as string, {
