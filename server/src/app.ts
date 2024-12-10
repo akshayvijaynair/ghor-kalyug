@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import mongoose from 'mongoose';
 import {GoogleGenerativeAI} from "@google/generative-ai";
 import {DifficultyLevel} from "./enums/generate-quiz";
 import quizResponseSchema from "./schema";
 import getPrompt from "./gemini";
+import {QuizResponse} from "./entity/quizResponseSchema";
+
 dotenv.config();
 
 const app = express();
@@ -18,29 +21,38 @@ if (!process.env.API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
+mongoose.connect(process.env.MONGO_DB_URI as string, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+} as mongoose.ConnectOptions).then(() => {
+    console.log('MongoDB connected');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+});
+
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
-    const { topics, difficulty, numQuestions } = req.body;
+    const {topics, difficulty, numQuestions} = req.body;
 
     // Validate input
     if (!Array.isArray(topics) || !difficulty || !numQuestions) {
-        return res.status(400).json({ error: "Invalid input." });
+        return res.status(400).json({error: "Invalid input."});
     }
 
     try {
         // Create generative model and generate content
         const topicString = topics.join(", ");
         const difficultyLevel = DifficultyLevel[difficulty]
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b", generationConfig:{
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash-8b", generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: quizResponseSchema,
                 temperature: 0.1,
-            } });
-        const result = await model.generateContent(getPrompt(topicString, numQuestions ,difficultyLevel));
-
+            }
+        });
+        const result = await model.generateContent(getPrompt(topicString, numQuestions, difficultyLevel));
         const quizContent = result.response.text();
-        const quiz = parseQuiz(quizContent);
-        res.status(200).json({ quiz });
+        res.status(200).json(await parseQuiz(quizContent));
     } catch (error) {
         console.error("Error generating quiz:", error);
         res.status(500).json({
@@ -54,21 +66,39 @@ app.post("/generate-quiz", async (req, res) => {
  * @param {string} quizText - Raw quiz content
  * @returns {Array} - Parsed questions
  */
-function parseQuiz(quizText: string) {
+async function parseQuiz(quizText: string) {
     if (!quizText) {
         throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
     }
     try {
-        const parsedQuestions = JSON.parse(quizText);
-        if (parsedQuestions.length === 0) {
-            throw new Error("No valid questions could be parsed from the quiz content");
-        }
-        return parsedQuestions;
-    }catch (parseError) {
+        const parsedQuiz = {quiz: JSON.parse(quizText)};
+        const quizResponse = new QuizResponse(parsedQuiz);
+        const savedQuiz = await quizResponse.save();
+
+        return {
+            _id: savedQuiz._id, // Fetch `_id` from the saved document
+            quiz: parsedQuiz.quiz.map(({answer, answerExplanation, ...rest}: any) => rest) // Exclude sensitive fields
+        };
+    } catch (parseError) {
         console.error(`Error parsing question block: ${parseError}`);
-        return []
+        return [];
     }
 }
+
+app.get("/quizzes/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const quiz = await QuizResponse.findById(id);
+        if (!quiz) {
+            res.status(404).json({ error: 'Quiz not found' });
+            return;
+        }
+        res.status(200).json(quiz);
+    } catch (error: any) {
+        console.error('Error fetching quiz by ID:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve quiz' });
+    }
+});
 
 // Server configuration
 const PORT = process.env.PORT || 8080;

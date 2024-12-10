@@ -5,6 +5,7 @@ export interface QuizRequest {
 }
 
 export interface QuizResponse {
+    _id: string;
     quiz: Question[];
 }
 
