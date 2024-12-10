@@ -23,7 +23,7 @@ if (!process.env.API_KEY) {
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
-mongoose.connect(process.env.MONGO_DB_URI as string, {
+mongoose.connect(process.env.MONGODB_URI as string, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 } as mongoose.ConnectOptions).then(() => {
