@@ -1,19 +1,26 @@
-import { SchemaType } from "@google/generative-ai";
+export enum SchemaType {
+    STRING = "string",
+    NUMBER = "number",
+    INTEGER = "integer",
+    BOOLEAN = "boolean",
+    ARRAY = "array",
+    OBJECT = "object",
+}
 
 const quizResponseSchema = {
-    description: "List of quiz questions",
+    description: "List of quiz questions with explanations",
     type: SchemaType.ARRAY,
     items: {
         type: SchemaType.OBJECT,
         properties: {
             questionId: {
                 type: SchemaType.STRING,
-                description: "Question ID for quiz",
+                description: "Unique identifier for the question",
                 nullable: false,
             },
             question: {
                 type: SchemaType.STRING,
-                description: "Question for quiz",
+                description: "Question text for the quiz",
                 nullable: false,
             },
             options: {
@@ -30,12 +37,12 @@ const quizResponseSchema = {
                             type: SchemaType.STRING,
                             description: "Option text for the question",
                             nullable: false,
-                        },
+                        }
                     },
                     required: ["key", "value"],
                     description: "Option for the question"
                 },
-                description: "Options for quiz",
+                description: "Options for the question",
                 nullable: false,
                 maxItems: 4,
             },
@@ -43,9 +50,14 @@ const quizResponseSchema = {
                 type: SchemaType.STRING,
                 description: "Key of the correct option",
                 nullable: false,
+            },
+            answerExplanation: {
+                type: SchemaType.STRING,
+                description: "Explanation for the correct answer",
+                nullable: false,
             }
         },
-        required: ["question", "options", "answer"], // Added 'answer' to required fields
+        required: ["questionId", "question", "options", "answer", "answerExplanation"],
     },
 };
 
