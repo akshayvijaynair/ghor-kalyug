@@ -37,7 +37,7 @@ const Register: React.FC = () => {
   };
 
   return (
-      <Box sx={{ maxWidth: 400, textAlign: "center",  margin: "50px auto",
+      <Box sx={{ maxHeight: 400, textAlign: "center",  margin: "50px auto",
         padding: "16px",
         borderRadius: "8px",
         boxShadow: 3,

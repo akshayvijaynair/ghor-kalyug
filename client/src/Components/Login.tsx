@@ -33,6 +33,7 @@ const Login = () => {
       setTimeout(() => {
         navigate("/");
       }, 5000); // Redirect after 5 seconds
+      // @ts-ignore
     } catch (error: never) {
       console.error("Error logging in:", error.message);
       setError("Error logging in: " + error.message);
@@ -42,7 +43,7 @@ const Login = () => {
   return (
       <Box
           sx={{
-            maxWidth: "400px",
+            maxHeight: 300,
             margin: "50px auto",
             padding: "16px",
             borderRadius: "8px",
