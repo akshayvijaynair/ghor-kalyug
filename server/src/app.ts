@@ -1,9 +1,11 @@
+// app.ts
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import {GoogleGenerativeAI} from "@google/generative-ai";
-import {DifficultyLevel} from "./enums/generate-quiz";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { DifficultyLevel } from "./enums/generate-quiz";
 import quizResponseSchema from "./schema";
+import db from "./db/connection.js"; // Import the db connection here
 
 // Configure environment variables
 dotenv.config();
@@ -36,12 +38,16 @@ app.post("/generate-quiz", async (req, res) => {
     try {
         // Create generative model and generate content
         const topicString = topics.join(", ");
-        const difficultyLevel = DifficultyLevel[difficulty]
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b", generationConfig:{
+        const difficultyLevel = DifficultyLevel[difficulty];
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash-8b", 
+            generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: quizResponseSchema,
                 temperature: 0.1,
-            } });
+            } 
+        });
+
         const result = await model.generateContent(`
 Topic: ${topicString}
 Generate ${numQuestions} multiple-choice questions based on the topics above at a difficulty level of ${difficultyLevel}.
@@ -59,6 +65,10 @@ Answer
 
         const quizContent = result.response.text();
         const quiz = parseQuiz(quizContent);
+
+        // Example of how you might use db once connected:
+        // await db.collection("quizzes").insertOne({ quiz, createdAt: new Date() });
+
         res.status(200).json({ quiz });
     } catch (error) {
         console.error("Error generating quiz:", error);
@@ -83,9 +93,9 @@ function parseQuiz(quizText: string) {
             throw new Error("No valid questions could be parsed from the quiz content");
         }
         return parsedQuestions;
-    }catch (parseError) {
+    } catch (parseError) {
         console.error(`Error parsing question block: ${parseError}`);
-        return []
+        return [];
     }
 }
 
