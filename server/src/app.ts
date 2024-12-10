@@ -4,26 +4,20 @@ import cors from "cors";
 import {GoogleGenerativeAI} from "@google/generative-ai";
 import {DifficultyLevel} from "./enums/generate-quiz";
 import quizResponseSchema from "./schema";
-
-// Configure environment variables
+import getPrompt from "./gemini";
 dotenv.config();
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(cors());
 
-// Check for API key
 if (!process.env.API_KEY) {
     console.error("API_KEY is missing. Please set it in your .env file.");
     process.exit(1);
 }
 
-// Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
-// Route to generate a quiz
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
     const { topics, difficulty, numQuestions } = req.body;
@@ -42,20 +36,7 @@ app.post("/generate-quiz", async (req, res) => {
                 responseSchema: quizResponseSchema,
                 temperature: 0.1,
             } });
-        const result = await model.generateContent(`
-Topic: ${topicString}
-Generate ${numQuestions} multiple-choice questions based on the topics above at a difficulty level of ${difficultyLevel}.
-Each question must have exactly 4 options.
-Format each question with the question text first, followed by options on new lines.
-Ensure each question is clearly separated and follows this format:
-
-Question text?
-Option 1
-Option 2
-Option 3
-Option 4
-Answer
-        `);
+        const result = await model.generateContent(getPrompt(topicString, numQuestions ,difficultyLevel));
 
         const quizContent = result.response.text();
         const quiz = parseQuiz(quizContent);
@@ -74,7 +55,7 @@ Answer
  * @returns {Array} - Parsed questions
  */
 function parseQuiz(quizText: string) {
-    if (!quizText || typeof quizText !== "string") {
+    if (!quizText) {
         throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
     }
     try {
