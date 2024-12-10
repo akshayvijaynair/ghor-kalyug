@@ -84,12 +84,24 @@ app.post("/generate-quiz", async (req, res) => {
 
 app.get("/quizzes/:id", async (req, res) => {
     const { id } = req.params;
+
+    // Debugging: Log the received ID
+    console.log("Received ID:", id);
+
     async function getQuizById(id: string): Promise<QuizResponseDocument | null> {
         try {
+            // Validate the ID format
+            if (!ObjectId.isValid(id)) {
+                console.error("Invalid ID format:", id);
+                throw new Error("Invalid ID format");
+            }
+
             const quiz = await quizCollection.findOne({ _id: new ObjectId(id) });
             if (!quiz) {
-                throw new Error("Quiz not found");
+                console.error("Quiz not found for ID:", id);
+                return null;
             }
+
             return quiz;
         } catch (error) {
             console.error("Error retrieving quiz by ID:", error);
@@ -100,15 +112,18 @@ app.get("/quizzes/:id", async (req, res) => {
     try {
         const quiz = await getQuizById(id);
         if (!quiz) {
-            res.status(404).json({ error: 'Quiz not found' });
+            res.status(404).json({ error: "Quiz not found" });
             return;
         }
+
         res.status(200).json(quiz);
     } catch (error: any) {
-        console.error('Error fetching quiz by ID:', error.message);
-        res.status(500).json({ error: 'Failed to retrieve quiz' });
+        console.error("Error fetching quiz by ID:", error.message);
+        res.status(500).json({ error: "Failed to retrieve quiz" });
     }
 });
+
+
 
 // Server configuration
 const PORT = process.env.PORT || 8080;
