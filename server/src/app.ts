@@ -1,13 +1,12 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import mongoose from 'mongoose';
 import {GoogleGenerativeAI} from "@google/generative-ai";
 import {DifficultyLevel} from "./enums/generate-quiz";
 import quizResponseSchema from "./schema";
 import getPrompt from "./gemini";
-import {QuizResponse} from "./entity/quizResponseSchema";
-import db from "./db/connection.js"; // Import the db connection here
+import quizCollection, { QuizResponseDocument } from "./entity/quizResponseSchema";
+import {ObjectId} from "mongodb"; // Import the db connection here
 
 dotenv.config();
 
@@ -23,17 +22,37 @@ if (!process.env.API_KEY) {
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
-mongoose.connect(process.env.MONGODB_URI as string, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-} as mongoose.ConnectOptions).then(() => {
-    console.log('MongoDB connected');
-}).catch(err => {
-    console.error('MongoDB connection error:', err);
-});
-
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
+    async function parseQuiz(quizText: string) {
+        if (!quizText) {
+            throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
+        }
+        try {
+            const parsedQuiz: QuizResponseDocument = {quiz: JSON.parse(quizText)};
+            const savedQuiz = await saveQuiz(parsedQuiz);
+
+            return {
+                _id: savedQuiz._id, // Fetch `_id` from the saved document
+                quiz: parsedQuiz.quiz.map(({answer, answerExplanation, ...rest}: any) => rest) // Exclude sensitive fields
+            };
+        } catch (parseError) {
+            console.error(`Error parsing question block: ${parseError}`);
+            return [];
+        }
+    }
+
+    async function saveQuiz(quizData: QuizResponseDocument): Promise<any> {
+        try {
+            const result = await quizCollection.insertOne(quizData);
+            return { ...quizData, _id: result.insertedId }; // Add the generated `_id` to the returned object
+        } catch (error) {
+            console.error("Error saving quiz:", error);
+            throw error;
+        }
+    }
+
+
     const {topics, difficulty, numQuestions} = req.body;
 
     // Validate input
@@ -63,34 +82,23 @@ app.post("/generate-quiz", async (req, res) => {
     }
 });
 
-/**
- * Parse quiz content into structured questions
- * @param {string} quizText - Raw quiz content
- * @returns {Array} - Parsed questions
- */
-async function parseQuiz(quizText: string) {
-    if (!quizText) {
-        throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
-    }
-    try {
-        const parsedQuiz = {quiz: JSON.parse(quizText)};
-        const quizResponse = new QuizResponse(parsedQuiz);
-        const savedQuiz = await quizResponse.save();
-
-        return {
-            _id: savedQuiz._id, // Fetch `_id` from the saved document
-            quiz: parsedQuiz.quiz.map(({answer, answerExplanation, ...rest}: any) => rest) // Exclude sensitive fields
-        };
-    } catch (parseError) {
-        console.error(`Error parsing question block: ${parseError}`);
-        return [];
-    }
-}
-
 app.get("/quizzes/:id", async (req, res) => {
     const { id } = req.params;
+    async function getQuizById(id: string): Promise<QuizResponseDocument | null> {
+        try {
+            const quiz = await quizCollection.findOne({ _id: new ObjectId(id) });
+            if (!quiz) {
+                throw new Error("Quiz not found");
+            }
+            return quiz;
+        } catch (error) {
+            console.error("Error retrieving quiz by ID:", error);
+            throw error;
+        }
+    }
+
     try {
-        const quiz = await QuizResponse.findById(id);
+        const quiz = await getQuizById(id);
         if (!quiz) {
             res.status(404).json({ error: 'Quiz not found' });
             return;
