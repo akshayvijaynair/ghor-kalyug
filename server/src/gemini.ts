@@ -6,15 +6,14 @@ export default function getPrompt (
 ): string {
     return `Topic: ${topicString}
 Generate ${numQuestions} multiple-choice questions based on the topics above at a difficulty level of ${difficultyLevel}.
-Each question must have exactly 4 options.
-Format each question with the question text first, followed by options on new lines.
-Ensure each question is clearly separated and follows this format:
-
-Question text?
-Option 1
-Option 2
-Option 3
-Option 4
-Answer
+Each question MUST have exactly 4 options. 
+Each question MUST have 1 one answer.
+Each question MUST have following format:
+    Question ID: Question text?
+        Option 1
+        Option 2
+        Option 3
+        Option 4
+        Answer
 `
 };
