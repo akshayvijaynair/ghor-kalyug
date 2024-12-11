@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
     "target": "ES6",
     "module": "commonjs",
     "resolveJsonModule": true,
@@ -14,5 +16,5 @@
     "paths": {}
   },
   "include": ["src"],
-  "ts-node": {}
+  "exclude": ["dist"]
 }
