@@ -86,6 +86,7 @@ const Quiz: React.FC<QuizProps> = ({ questions, quizId }) => {
       console.log("Fetched Quiz Data:", data);
   
       // Process answers and calculate score
+      // @ts-ignore
       const correctAnswers = data.quiz.map((q: any) => q.answer); // Extract correct answers
       let correctCount = 0;
   

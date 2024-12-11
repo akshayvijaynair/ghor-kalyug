@@ -7,6 +7,7 @@ interface ImportMetaEnv {
     readonly messagingSenderId: string
     readonly appId: string
     readonly measurementId: string
+    readonly apiDomain: string
 }
 
 interface ImportMeta {

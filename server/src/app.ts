@@ -12,7 +12,14 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
 
 if (!process.env.API_KEY) {
     console.error("API_KEY is missing. Please set it in your .env file.");
@@ -21,6 +28,17 @@ if (!process.env.API_KEY) {
 
 // Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
+app.get("/", async(req, res) => {
+    try {
+        res.status(200).json("Hello World!");
+    }catch (err) {
+        console.error("Error generating quiz:", err);
+        res.status(500).json({
+            error: "An internal error occurred while generating the quiz. Please try again later.",
+        });
+    }
+})
 
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {

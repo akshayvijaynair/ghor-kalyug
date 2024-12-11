@@ -2,7 +2,8 @@ import { QuizRequest, QuizResponse } from '../types/generate-quiz.tsx';
 
 
 export const generateQuiz = async (request: QuizRequest): Promise<QuizResponse> => {
-    const endpoint = 'http://localhost:8080/generate-quiz';
+    const domain = import.meta.env.VITE_API_DOMAIN;
+    const endpoint = domain+'/generate-quiz';
 
     try {
         const response = await fetch(endpoint, {
