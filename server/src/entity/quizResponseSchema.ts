@@ -6,7 +6,7 @@ interface Option {
     value: string;
 }
 
-interface Question {
+export interface Question {
     questionId: string;
     question: string;
     options: Option[];

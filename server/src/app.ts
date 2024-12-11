@@ -123,8 +123,6 @@ app.get("/quizzes/:id", async (req, res) => {
     }
 });
 
-
-
 // Server configuration
 const PORT = process.env.PORT || 8080;
 
