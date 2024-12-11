@@ -4,6 +4,36 @@ CS 696A Project
 ## Setup for local development
 At the root level, run `docker-compose up --build`
 
+## environment variables
+
+### Client
+```typescript
+VITE_API_KEY="",
+VITE_AUTH_DOMAIN="",
+VITE_PROJECT_ID="",
+VITE_STORAGE_BUCKET="",
+VITE_MESSAGING_SENDER_ID="",
+VITE_APP_ID="",
+VITE_MEASUREMENT_ID=""
+VITE_API_DOMAIN=""
+```
+
+### Server
+```typescript
+NODE_ENV=""
+API_KEY=""
+MONGODB_URI=""
+DB_NAME=""
+CORS_ORIGIN=""
+```
+
+## Steps for GCP deployment
+
+> [!IMPORTANT]
+> We use app engine for GCP deployment
+>
+
+At the root level, execute `./deploy.sh`
 
 ## API design
 Here’s an API design proposal for the described quiz application requirements. The APIs are categorized by functionality and stakeholders (Students, Teachers, and Admin), focusing on scalability, modularity, and ease of integration.
