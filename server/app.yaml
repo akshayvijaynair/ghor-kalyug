@@ -11,10 +11,6 @@ handlers:
 
 env_variables:
   NODE_ENV: "production"
-  CORS_ORIGIN: "https://frontend-dot-gen-lang-client-0403310649.uc.r.appspot.com"
-  API_KEY: "AIzaSyDBiofolWvdcaPIC_c3uvGVfsgCk3Xa3NM"
-  MONGODB_URI: "mongodb+srv://akshayvijaynair:1hPtamNfWbSl6058@cluster0.o879l.mongodb.net/quizApp?retryWrites=true&w=majority"
-  DB_NAME: "quizApp"
 
 automatic_scaling:
   target_cpu_utilization: 0.65

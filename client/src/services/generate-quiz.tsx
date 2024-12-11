@@ -3,6 +3,7 @@ import { QuizRequest, QuizResponse } from '../types/generate-quiz.tsx';
 
 export const generateQuiz = async (request: QuizRequest): Promise<QuizResponse> => {
     const domain = import.meta.env.VITE_API_DOMAIN;
+    console.log(domain);
     const endpoint = domain+'/generate-quiz';
 
     try {
