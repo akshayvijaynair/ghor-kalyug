@@ -9,11 +9,11 @@ import {
   Slider,
 } from '@mui/material';
 import { Add, ArrowForward, Delete } from '@mui/icons-material';
-import Quiz from '@components/Quiz';
-import StyledCard from '@components/StyledCard';
-import StyledTextField from '@components/StyledTextField';
+import Quiz from '../Components/Quiz';
+import StyledCard from '../Components/StyledCard';
+import StyledTextField from '../Components/StyledTextField';
 import { generateQuiz } from '../services/generate-quiz';
-import { QuizRequest } from "../types/generate-quiz";
+import {Question, QuizRequest} from "../types/generate-quiz";
 
 const Home: React.FC = () => {
   const [subject, setSubject] = useState('');
@@ -21,7 +21,7 @@ const Home: React.FC = () => {
   const [difficulty, setDifficulty] = useState(3);
   const [numQuestions, setNumQuestions] = useState(10);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
   }
 
   if (quizStarted) {
-    return <Quiz questions={questions} />;
+    return <Quiz questions={questions} quizId="test"/>;
   }
 
   return (
@@ -149,6 +149,7 @@ const Home: React.FC = () => {
                   placeholder="Enter subject"
                   variant="outlined"
                   value={subject}
+                  // @ts-ignore
                   onChange={(e) => {
                     setSubject(e.target.value);
                     // Clear error when user types

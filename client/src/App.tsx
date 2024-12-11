@@ -7,7 +7,6 @@ import Header from './Components/Header';
 import Home from './Pages/Home';
 import theme from './theme';
 import Login from "./Components/Login";
-import Register from "./Components/Register";
 
 const App: React.FC = () => {
   return (

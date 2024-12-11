@@ -31,8 +31,9 @@ const Register: React.FC = () => {
       setTimeout(() => {
         navigate("/login"); // Redirect to the login page after 5 seconds
       }, 5000);
-    } catch (error: never) {
-      setMessage(`Error: ${error.message}`);
+    } catch (error) {
+      // @ts-ignore
+        setMessage(`Error: ${error.message}`);
     }
   };
 
