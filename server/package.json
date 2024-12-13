@@ -5,15 +5,17 @@
   "main": "app.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --inspect dist/app.js",
-    "start": "node dist/app.js"
+    "dev": "nodemon --inspect dist/app.ts",
+    "start": "node src/app.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "cookie-parser": "~1.4.7",
     "cors": "^2.8.5",
     "debug": "~4.3.7",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.6",
     "express": "^5.0.1",
+    "mongodb": "^6.11.0",
     "morgan": "~1.10.0"
   },
   "devDependencies": {
@@ -21,9 +23,9 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.9.0",
+    "@types/node": "^22.10.1",
     "nodemon": "^3.1.7",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.6.3"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
   }
 }
