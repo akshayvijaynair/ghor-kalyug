@@ -18,6 +18,7 @@ import {Question} from "../types/quiz.tsx";
 import {useParams} from "react-router-dom";
 import {getQuiz} from "../services/get-quiz.tsx";
 import {submitQuizAndGetAnswers} from "../services/get-quiz-answers.tsx";
+import {QRCodeCanvas} from "qrcode.react";
 
 const StyledCard = styled(Card)(({theme}) => ({
     background: theme.palette.background.paper,
@@ -43,7 +44,7 @@ const ProgressButton = styled(Button)<{ completed?: boolean }>(({theme, complete
 
 const Quiz: React.FC = () => {
     const {id} = useParams();
-
+    const url = import.meta.env.VITE_DOMAIN + "/home/"+id;
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>([]);
@@ -72,6 +73,9 @@ const Quiz: React.FC = () => {
 
     const handleNext = () => {
         setCurrentQuestion((prev) => Math.min(prev + 1, questions.length - 1));
+        const newSelectedAnswers = [...selectedAnswers];
+        newSelectedAnswers[currentQuestion] = null;
+        setSelectedAnswers(newSelectedAnswers);
     };
 
     const handlePrevious = () => {
@@ -147,35 +151,42 @@ const Quiz: React.FC = () => {
     }
 
     return (
-        <Grid container sx={{
-            padding: 5
-        }}>
-            <Grid size={{xs: 12, md: 3}}>
-                <Paper elevation={2}
-                       sx={{
-                           width: '100%',
-                           display: 'flex',
-                           flexDirection: 'column',
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           minHeight: 'calc(100vh - 150px)'
-                       }}
+        <Grid
+            container
+            spacing={2}
+            sx={{
+                padding: { xs: 2, md: 5 }, // Adjust padding for mobile and desktop
+            }}
+        >
+            {/* Progress Section */}
+            <Grid size={{ xs:12, md:3, lg:3 }}>
+                <Paper
+                    elevation={2}
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' }, // Adjust height
+                        padding: { xs: 2, md: 3 },
+                    }}
                 >
                     <Box>
-                        <Typography variant="h6" sx={{p: 3}}>
+                        <Typography variant="h6" sx={{ p: 2 }}>
                             Progress
                             <LinearProgress
                                 variant="determinate"
                                 value={(selectedAnswers.filter((a) => a !== null).length / questions.length) * 100}
-                                sx={{mb:1}}
+                                sx={{ mb: 1 }}
                             />
                             <Typography variant="body2">
                                 {selectedAnswers.filter((a) => a !== null).length} of {questions.length} answered
                             </Typography>
                         </Typography>
-                        <Grid container spacing={1} sx={{ paddingLeft: 3, paddingRight: 3}}>
+                        <Grid container spacing={1}>
                             {questions.map((_, index) => (
-                                <Grid size={1} sx={{ margin: 1}} key={index}>
+                                <Grid size={{xs: 1}} sx={{ m: 2 }} key={index}>
                                     <ProgressButton
                                         onClick={() => handleJumpToQuestion(index)}
                                         completed={selectedAnswers[index] !== null}
@@ -188,21 +199,24 @@ const Quiz: React.FC = () => {
                     </Box>
                 </Paper>
             </Grid>
-            <Grid size={{xs: 12, md: 6}}>
-                <Paper elevation={2}
-                       sx={{
-                           width: '100%',
-                           display: 'flex',
-                           flexDirection: 'column',
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           minHeight: 'calc(100vh - 150px)',
-                           marginLeft: 2
-                       }}
+
+            {/* Question Section */}
+            <Grid size={{ xs:12, md:5, lg:6}}>
+                <Paper
+                    elevation={2}
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' }, // Adjust height
+                        marginLeft: { xs: 0, md: 2 },
+                        padding: { xs: 2, md: 4 },
+                    }}
                 >
-                    {/* Question Display */}
                     <StyledCard elevation={4}>
-                        <CardContent sx={{p: 4}}>
+                        <CardContent>
                             <Typography variant="h5" gutterBottom>
                                 {questions[currentQuestion].question}
                             </Typography>
@@ -215,24 +229,22 @@ const Quiz: React.FC = () => {
                                         <FormControlLabel
                                             key={index}
                                             value={index}
-                                            control={<Radio/>}
+                                            control={<Radio />}
                                             label={option.value}
                                         />
                                     ))}
                                 </RadioGroup>
                             </FormControl>
-                            <Box sx={{mt: 4, display: 'flex', justifyContent: 'space-between'}}>
+                            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
                                 <Button
                                     variant="contained"
-                                    startIcon={<ArrowBack/>}
+                                    startIcon={<ArrowBack />}
                                     onClick={handlePrevious}
                                     disabled={currentQuestion === 0}
                                 >
                                     Previous
                                 </Button>
-
                                 {currentQuestion === questions.length - 1 ? (
-                                    // Last question: show submit button
                                     <Button
                                         variant="contained"
                                         color="success"
@@ -242,10 +254,9 @@ const Quiz: React.FC = () => {
                                         Submit
                                     </Button>
                                 ) : (
-                                    // Not last question: show next button
                                     <Button
                                         variant="contained"
-                                        endIcon={<ArrowForward/>}
+                                        endIcon={<ArrowForward />}
                                         onClick={handleNext}
                                         disabled={selectedAnswers[currentQuestion] === null}
                                     >
@@ -257,27 +268,48 @@ const Quiz: React.FC = () => {
                     </StyledCard>
                 </Paper>
             </Grid>
-            <Grid size={{xs: 12, md: 3}}>
-                <Paper elevation={2}
-                       sx={{
-                           width: '100%',
-                           display: 'flex',
-                           flexDirection: 'column',
-                           alignItems: 'center',
-                           justifyContent: 'center',
-                           minHeight: 'calc(100vh - 150px)',
-                           marginLeft: 4
-                       }}
+
+            {/* Share Section */}
+            <Grid size={{ xs:12, md:4, lg:3 }}>
+                <Paper
+                    elevation={2}
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' },
+                        marginLeft: { xs: 0, md: 4 },
+                        padding: { xs: 2, md: 3 },
+                    }}
                 >
-                    {/* Quiz Share */}
-                    <Box >
-                        <Typography variant="h6" gutterBottom>
-                            Like this Quiz? Share it with your friends
-                        </Typography>
+                    <Typography variant="h6" gutterBottom>
+                        Like this Quiz? Share it with your friends
+                    </Typography>
+                    <Box
+                        sx={{
+                            width: { xs: 128, md: 256 }, // Ensure responsive sizing
+                            height: { xs: 128, md: 256 }, // Match width and height
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden', // Prevent QR code from exceeding container
+                        }}
+                    >
+                        <QRCodeCanvas
+                            value={url}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain', // Prevent stretching
+                            }}
+                        />
                     </Box>
                 </Paper>
             </Grid>
         </Grid>
+
     );
 };
 

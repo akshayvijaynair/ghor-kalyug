@@ -8,6 +8,7 @@ interface ImportMetaEnv {
     readonly appId: string
     readonly measurementId: string
     readonly apiDomain: string
+    readonly domain: string
 }
 
 interface ImportMeta {
