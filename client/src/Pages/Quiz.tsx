@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { Question } from "../types/generate-quiz.tsx";
+import { Question } from "../types/quiz.tsx";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   background: theme.palette.background.paper,

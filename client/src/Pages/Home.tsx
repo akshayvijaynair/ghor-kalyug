@@ -9,11 +9,11 @@ import {
   Slider,
 } from '@mui/material';
 import { Add, ArrowForward, Delete } from '@mui/icons-material';
-import Quiz from '../Components/Quiz';
+import Quiz from './Quiz';
 import StyledCard from '../Components/StyledCard';
 import StyledTextField from '../Components/StyledTextField';
 import { generateQuiz } from '../services/generate-quiz';
-import {Question, QuizRequest} from "../types/generate-quiz";
+import {Question, QuizRequest} from "../types/quiz.tsx";
 
 const Home: React.FC = () => {
   const [subject, setSubject] = useState('');
