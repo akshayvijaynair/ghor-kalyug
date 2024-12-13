@@ -157,7 +157,7 @@ const Quiz: React.FC = () => {
             container
             spacing={2}
             sx={{
-                padding: { xs: 2, md: 5 }, // Adjust padding for mobile and desktop
+                padding: { xs: 2, md: 5 },
             }}
         >
             {/* Progress Section */}
@@ -299,12 +299,12 @@ const Quiz: React.FC = () => {
                     </Typography>
                     <Box
                         sx={{
-                            width: { xs: 128, md: 256 }, // Ensure responsive sizing
-                            height: { xs: 128, md: 256 }, // Match width and height
+                            width: { xs: 128, md: 256 },
+                            height: { xs: 128, md: 256 },
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            overflow: 'hidden', // Prevent QR code from exceeding container
+                            overflow: 'hidden',
                         }}
                     >
                         <QRCodeCanvas
@@ -312,7 +312,7 @@ const Quiz: React.FC = () => {
                             style={{
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'contain', // Prevent stretching
+                                objectFit: 'contain',
                             }}
                         />
                     </Box>
