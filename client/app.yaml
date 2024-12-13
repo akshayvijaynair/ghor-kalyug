@@ -22,6 +22,8 @@ handlers:
 
 env_variables:
   NODE_ENV: "production"
+  includes:
+    - env_variables.yaml
 
 automatic_scaling:
   target_cpu_utilization: 0.65

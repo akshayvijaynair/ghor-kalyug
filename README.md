@@ -5,7 +5,7 @@ CS 696A Project
 At the root level, run `docker-compose up --build`
 
 ## environment variables
-
+Add the below to .env and a env_variables.yaml
 ### Client
 ```typescript
 VITE_API_KEY="",
@@ -34,6 +34,9 @@ CORS_ORIGIN=""
 >
 
 At the root level, execute `./deploy.sh`
+
+## System Design
+https://drive.google.com/file/d/1QYruwR1wnb4nE4quxkjihrWymH5j_bSl/view?usp=sharing
 
 ## API design
 Here’s an API design proposal for the described quiz application requirements. The APIs are categorized by functionality and stakeholders (Students, Teachers, and Admin), focusing on scalability, modularity, and ease of integration.
