@@ -59,9 +59,8 @@ const Quiz: React.FC = () => {
     }, [questions]);
 
     useEffect(() => {
-        // Initialize the selected answers array to match the length of questions
         if (id) {
-            getQuiz(id).then(r => setQuestions(r.quiz));
+            getQuiz(id).then((r) => setQuestions(r.quiz));
         }
     }, [id]);
 
@@ -71,11 +70,14 @@ const Quiz: React.FC = () => {
         setSelectedAnswers(newSelectedAnswers);
     };
 
+    const handleClearAnswer = () => {
+        const newSelectedAnswers = [...selectedAnswers];
+        newSelectedAnswers[currentQuestion] = null; // Reset the current question's answer
+        setSelectedAnswers(newSelectedAnswers);
+    };
+
     const handleNext = () => {
         setCurrentQuestion((prev) => Math.min(prev + 1, questions.length - 1));
-        const newSelectedAnswers = [...selectedAnswers];
-        newSelectedAnswers[currentQuestion] = null;
-        setSelectedAnswers(newSelectedAnswers);
     };
 
     const handlePrevious = () => {
@@ -210,7 +212,7 @@ const Quiz: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' }, // Adjust height
+                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' },
                         marginLeft: { xs: 0, md: 2 },
                         padding: { xs: 2, md: 4 },
                     }}
@@ -218,14 +220,14 @@ const Quiz: React.FC = () => {
                     <StyledCard elevation={4}>
                         <CardContent>
                             <Typography variant="h5" gutterBottom>
-                                {questions[currentQuestion].question}
+                                {questions[currentQuestion]?.question}
                             </Typography>
                             <FormControl component="fieldset">
                                 <RadioGroup
-                                    value={selectedAnswers[currentQuestion]}
+                                    value={selectedAnswers[currentQuestion] ?? ''}
                                     onChange={handleAnswerChange}
                                 >
-                                    {questions[currentQuestion].options.map((option, index) => (
+                                    {questions[currentQuestion]?.options.map((option, index) => (
                                         <FormControlLabel
                                             key={index}
                                             value={index}
@@ -243,6 +245,14 @@ const Quiz: React.FC = () => {
                                     disabled={currentQuestion === 0}
                                 >
                                     Previous
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={handleClearAnswer}
+                                    disabled={selectedAnswers[currentQuestion] === null}
+                                >
+                                    Clear Answer
                                 </Button>
                                 {currentQuestion === questions.length - 1 ? (
                                     <Button
