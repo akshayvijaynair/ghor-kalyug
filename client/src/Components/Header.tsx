@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import {AppBar, Toolbar, Typography, Button, Box,} from '@mui/material';
+import {AppBar, Toolbar, Typography, Box,} from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -8,15 +8,9 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundImage: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
 }));
 
-const NavButton = styled(Button)(({ theme }) => ({
-  color: '#fff',
-  marginLeft: theme.spacing(2),
-  '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-}));
-
 const Header: React.FC = () => {
+
+
   return (
     <StyledAppBar position="sticky" elevation={0}>
       <Toolbar>
@@ -34,15 +28,33 @@ const Header: React.FC = () => {
           Ghor Kalyug
         </Typography>
         <Box>
-          <NavButton>
-            Home
-          </NavButton>
-          <NavButton>
+          <Typography
+              variant="body1"
+              component={RouterLink}
+              to="/home"
+              sx={{
+                flexGrow: 1,
+                textDecoration: 'none',
+                color: 'white',
+                fontWeight: 'bold',
+                marginRight: 2
+              }}
+          >
+            Generate Quiz
+          </Typography>
+          <Typography
+              variant="body1"
+              component={RouterLink}
+              to="/"
+              sx={{
+                flexGrow: 1,
+                textDecoration: 'none',
+                color: 'white',
+                fontWeight: 'bold',
+              }}
+          >
             Login
-          </NavButton>
-          <NavButton>
-            Register
-          </NavButton>
+          </Typography>
         </Box>
       </Toolbar>
     </StyledAppBar>
