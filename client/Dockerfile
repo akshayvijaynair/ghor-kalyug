@@ -15,4 +15,5 @@ COPY . .
 EXPOSE 5173
 
 # Default command
+CMD ["npm", "run", "build"]
 CMD ["npm", "run", "dev"]
