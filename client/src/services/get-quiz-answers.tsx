@@ -1,10 +1,10 @@
-import {QuizRequest, QuizResponse} from '../types/quiz.tsx';
+import {QuizResponse} from '../types/quiz.tsx';
 
 
-export const getQuizAnswers = async (request: QuizRequest): Promise<QuizResponse> => {
+export const submitQuizAndGetAnswers = async (): Promise<QuizResponse> => {
     const domain = import.meta.env.VITE_API_DOMAIN;
     console.log(domain);
-    const endpoint = `${domain}/quiz`;
+    const endpoint = `${domain}/quizzes/`;
 
     try {
         const response = await fetch(endpoint, {
@@ -12,7 +12,7 @@ export const getQuizAnswers = async (request: QuizRequest): Promise<QuizResponse
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(request),
+            body: JSON.stringify({}),
         });
 
         if (!response.ok) {

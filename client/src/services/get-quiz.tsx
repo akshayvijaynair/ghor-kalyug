@@ -4,7 +4,7 @@ import { QuizResponse } from '../types/quiz.tsx';
 export const getQuiz = async (params: string): Promise<QuizResponse> => {
     const domain = import.meta.env.VITE_API_DOMAIN;
     console.log(domain);
-    const endpoint = `${domain}/quiz?id=${params}`;
+    const endpoint = `${domain}/quizzes/${params}`;
 
     try {
         const response = await fetch(endpoint, {
