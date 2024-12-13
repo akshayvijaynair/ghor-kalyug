@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 import Header from './Components/Header';
 import Home from './Pages/Home';
 import theme from './theme';
-import Login from "./Components/Login";
+import Auth from "./Pages/Auth.tsx";
 
 const App: React.FC = () => {
   return (
@@ -36,8 +36,9 @@ const App: React.FC = () => {
             }}
           >
             <Routes>
-                <Route path="/" element={<Login />} />
-              <Route path="/home" element={<Home />} />
+                <Route path="/" element={<Auth />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/home/:id" element={<Home />} />
              {/* <Route path="/register" element={<Register />} /> */}
             </Routes>
           </Box>

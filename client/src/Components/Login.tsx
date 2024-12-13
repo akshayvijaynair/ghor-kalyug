@@ -41,16 +41,7 @@ const Login = () => {
   };
 
   return (
-      <Box
-          sx={{
-            maxHeight: 300,
-            margin: "50px auto",
-            padding: "16px",
-            borderRadius: "8px",
-            boxShadow: 3,
-            bgcolor: "background.paper",
-          }}
-      >
+      <Box>
         <Typography variant="h4" textAlign="center" mb={2}>
           Login
         </Typography>

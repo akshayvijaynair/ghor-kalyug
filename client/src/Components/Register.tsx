@@ -38,13 +38,9 @@ const Register: React.FC = () => {
   };
 
   return (
-      <Box sx={{ maxHeight: 400, textAlign: "center",  margin: "50px auto",
-        padding: "16px",
-        borderRadius: "8px",
-        boxShadow: 3,
-        bgcolor: "background.paper" }}>
-        <Typography variant="h4" gutterBottom>
-          Register
+      <Box>
+        <Typography variant="h4" textAlign="center" mb={2}>
+          New User Registration
         </Typography>
         {message && (
             <Alert severity={message.includes("Error") ? "error" : "success"} sx={{ mb: 2 }}>
@@ -81,7 +77,7 @@ const Register: React.FC = () => {
               required
               sx={{ mb: 2 }}
           />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2, p:3 }}>
             Register
           </Button>
         </form>
