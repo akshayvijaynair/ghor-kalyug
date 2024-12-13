@@ -29,7 +29,7 @@ const Register: React.FC = () => {
 
       setMessage("User successfully registered!");
       setTimeout(() => {
-        navigate("/login"); // Redirect to the login page after 5 seconds
+        navigate("/"); // Redirect to the login page after 5 seconds
       }, 5000);
     } catch (error) {
       // @ts-ignore
