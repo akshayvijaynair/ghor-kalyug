@@ -1,4 +1,4 @@
-import { QuizRequest, QuizResponse } from '../types/generate-quiz.tsx';
+import { QuizRequest, QuizResponse } from '../types/quiz.tsx';
 
 
 export const generateQuiz = async (request: QuizRequest): Promise<QuizResponse> => {
