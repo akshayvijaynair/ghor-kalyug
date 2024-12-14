@@ -29,8 +29,8 @@ const quizResponseSchema = {
                     type: SchemaType.OBJECT,
                     properties: {
                         key: {
-                            type: SchemaType.STRING,
-                            description: "Unique identifier for the option",
+                            type: SchemaType.NUMBER,
+                            description: "Unique identifier for the option. value will be integer values between 0 to 3",
                             nullable: false,
                         },
                         value: {
