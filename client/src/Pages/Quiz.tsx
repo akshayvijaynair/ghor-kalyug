@@ -17,7 +17,6 @@ import {styled} from '@mui/material/styles';
 import {Question} from "../types/quiz.tsx";
 import {useParams} from "react-router-dom";
 import {getQuiz} from "../services/get-quiz.tsx";
-import {submitQuizAndGetAnswers} from "../services/get-quiz-answers.tsx";
 import {QRCodeCanvas} from "qrcode.react";
 
 const StyledCard = styled(Card)(({theme}) => ({
@@ -44,10 +43,10 @@ const ProgressButton = styled(Button)<{ completed?: boolean }>(({theme, complete
 
 const Quiz: React.FC = () => {
     const {id} = useParams();
-    const url = import.meta.env.VITE_DOMAIN + "/home/"+id;
+    const url = import.meta.env.VITE_DOMAIN + "/home/" + id;
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>([]);
+    const [selectedAnswers, setSelectedAnswers] = useState<(string | null)[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState<number | null>(null);
 
@@ -66,7 +65,7 @@ const Quiz: React.FC = () => {
 
     const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newSelectedAnswers = [...selectedAnswers];
-        newSelectedAnswers[currentQuestion] = Number(event.target.value);
+        newSelectedAnswers[currentQuestion] = event.target.value;
         setSelectedAnswers(newSelectedAnswers);
     };
 
@@ -90,24 +89,13 @@ const Quiz: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-            // Log the quizId to ensure it is valid
-            console.log("Quiz ID:", id);
-            console.log(questions)
-            console.log(selectedAnswers);
-            const data = await submitQuizAndGetAnswers();
-            // Handle grading logic here...
-            console.log("Fetched Quiz Data:", data);
-
-            // Process answers and calculate score
-            // @ts-ignore
-            const correctAnswers = data.quiz.map((q: any) => q.answer); // Extract correct answers
+            const correctAnswers = questions.map((q: Question) => q.answer);
             let correctCount = 0;
 
             for (let i = 0; i < questions.length; i++) {
                 const userSelectedOptionIndex = selectedAnswers[i];
                 if (userSelectedOptionIndex !== null) {
-                    const userAnswerKey = questions[i].options[userSelectedOptionIndex].key;
-                    if (userAnswerKey === correctAnswers[i]) {
+                    if (selectedAnswers[i] === correctAnswers[i]) {
                         correctCount++;
                     }
                 }
@@ -133,24 +121,36 @@ const Quiz: React.FC = () => {
     // If submitted, display the result
     if (isSubmitted && score !== null) {
         return (
-            <Box
+            <Grid
+                container
+                spacing={2}
                 sx={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 'calc(100vh - 64px)',
-                    p: 4,
+                    padding: {xs: 2, md: 5},
                 }}
             >
-                <Typography variant="h4" gutterBottom>
-                    Quiz Completed!
-                </Typography>
-                <Typography variant="h6">
-                    Your Score: {score} / {questions.length}
-                </Typography>
-            </Box>
+                {/* Progress Section */}
+                <Grid size={{xs: 12, md: 12, lg: 12}}>
+                    <Paper
+                        elevation={2}
+                        sx={{
+                            width: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'}, // Adjust height
+                            padding: {xs: 2, md: 3},
+                        }}
+                    >
+                        <Typography variant="h1" gutterBottom>
+                            Quiz Completed!
+                        </Typography>
+                        <Typography variant="h3">
+                            Your Score: {score} / {questions.length}
+                        </Typography>
+                    </Paper>
+                </Grid>
+            </Grid>
         );
     }
 
@@ -159,11 +159,11 @@ const Quiz: React.FC = () => {
             container
             spacing={2}
             sx={{
-                padding: { xs: 2, md: 5 },
+                padding: {xs: 2, md: 5},
             }}
         >
             {/* Progress Section */}
-            <Grid size={{ xs:12, md:3, lg:3 }}>
+            <Grid size={{xs: 12, md: 3, lg: 3}}>
                 <Paper
                     elevation={2}
                     sx={{
@@ -172,17 +172,17 @@ const Quiz: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' }, // Adjust height
-                        padding: { xs: 2, md: 3 },
+                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'}, // Adjust height
+                        padding: {xs: 2, md: 3},
                     }}
                 >
                     <Box>
-                        <Typography variant="h6" sx={{ p: 2 }}>
+                        <Typography variant="h6" sx={{p: 2}}>
                             Progress
                             <LinearProgress
                                 variant="determinate"
                                 value={(selectedAnswers.filter((a) => a !== null).length / questions.length) * 100}
-                                sx={{ mb: 1 }}
+                                sx={{mb: 1}}
                             />
                             <Typography variant="body2">
                                 {selectedAnswers.filter((a) => a !== null).length} of {questions.length} answered
@@ -190,7 +190,7 @@ const Quiz: React.FC = () => {
                         </Typography>
                         <Grid container spacing={1}>
                             {questions.map((_, index) => (
-                                <Grid size={{xs: 1}} sx={{ m: 2 }} key={index}>
+                                <Grid size={{xs: 1}} sx={{m: 2}} key={index}>
                                     <ProgressButton
                                         onClick={() => handleJumpToQuestion(index)}
                                         completed={selectedAnswers[index] !== null}
@@ -205,7 +205,7 @@ const Quiz: React.FC = () => {
             </Grid>
 
             {/* Question Section */}
-            <Grid size={{ xs:12, md:5, lg:6}}>
+            <Grid size={{xs: 12, md: 5, lg: 6}}>
                 <Paper
                     elevation={2}
                     sx={{
@@ -214,20 +214,20 @@ const Quiz: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' },
-                        marginLeft: { xs: 0, md: 2 },
-                        padding: { xs: 2, md: 4 },
+                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'},
+                        marginLeft: {xs: 0, md: 2},
+                        padding: {xs: 2, md: 4},
                     }}
                 >
                     <StyledCard elevation={4}>
                         <CardContent>
                             <Grid container>
-                                <Grid size={{xs: 12 }}>
+                                <Grid size={{xs: 12}}>
                                     <Typography variant="h5" gutterBottom>
                                         {questions[currentQuestion]?.question}
                                     </Typography>
                                 </Grid>
-                                <Grid size={{xs: 12 }}>
+                                <Grid size={{xs: 12}}>
                                     <FormControl component="fieldset">
                                         <RadioGroup
                                             value={selectedAnswers[currentQuestion] ?? ''}
@@ -236,18 +236,18 @@ const Quiz: React.FC = () => {
                                             {questions[currentQuestion]?.options.map((option, index) => (
                                                 <FormControlLabel
                                                     key={index}
-                                                    value={index}
-                                                    control={<Radio />}
+                                                    value={option.key}
+                                                    control={<Radio/>}
                                                     label={option.value}
                                                 />
                                             ))}
                                         </RadioGroup>
                                     </FormControl>
                                 </Grid>
-                                <Grid size={{xs: 12}} sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
+                                <Grid size={{xs: 12}} sx={{mt: 4, display: 'flex', justifyContent: 'space-between'}}>
                                     <Button
                                         variant="contained"
-                                        startIcon={<ArrowBack />}
+                                        startIcon={<ArrowBack/>}
                                         onClick={handlePrevious}
                                         disabled={currentQuestion === 0}
                                     >
@@ -263,21 +263,21 @@ const Quiz: React.FC = () => {
                                     </Button>
                                     <Button
                                         variant="contained"
-                                        endIcon={<ArrowForward />}
+                                        endIcon={<ArrowForward/>}
                                         onClick={handleNext}
-                                        disabled={currentQuestion === questions.length-1}
+                                        disabled={currentQuestion === questions.length - 1}
                                     >
                                         Next
                                     </Button>
                                 </Grid>
                             </Grid>
-                            <Grid size={{xs: 12}} sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
+                            <Grid size={{xs: 12}} sx={{mt: 4, display: 'flex', justifyContent: 'space-between'}}>
                                 <Button
                                     variant="contained"
                                     color="success"
-                                    sx={{ width: "100%" }}
+                                    sx={{width: "100%"}}
                                     onClick={handleSubmit}
-                                    disabled={selectedAnswers.filter(x => x !== null).length!==questions.length}
+                                    disabled={selectedAnswers.filter(x => x !== null).length !== questions.length}
                                 >
                                     Submit
                                 </Button>
@@ -288,7 +288,7 @@ const Quiz: React.FC = () => {
             </Grid>
 
             {/* Share Section */}
-            <Grid size={{ xs:12, md:4, lg:3 }}>
+            <Grid size={{xs: 12, md: 4, lg: 3}}>
                 <Paper
                     elevation={2}
                     sx={{
@@ -297,9 +297,9 @@ const Quiz: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: { xs: 'auto', md: 'calc(100vh - 150px)' },
-                        marginLeft: { xs: 0, md: 4 },
-                        padding: { xs: 2, md: 3 },
+                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'},
+                        marginLeft: {xs: 0, md: 4},
+                        padding: {xs: 2, md: 3},
                     }}
                 >
                     <Typography variant="h6" gutterBottom>
@@ -307,8 +307,8 @@ const Quiz: React.FC = () => {
                     </Typography>
                     <Box
                         sx={{
-                            width: { xs: 128, md: 256 },
-                            height: { xs: 128, md: 256 },
+                            width: {xs: 128, md: 256},
+                            height: {xs: 128, md: 256},
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
