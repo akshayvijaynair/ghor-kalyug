@@ -92,6 +92,8 @@ const Quiz: React.FC = () => {
         try {
             // Log the quizId to ensure it is valid
             console.log("Quiz ID:", id);
+            console.log(questions)
+            console.log(selectedAnswers);
             const data = await submitQuizAndGetAnswers();
             // Handle grading logic here...
             console.log("Fetched Quiz Data:", data);
@@ -219,61 +221,67 @@ const Quiz: React.FC = () => {
                 >
                     <StyledCard elevation={4}>
                         <CardContent>
-                            <Typography variant="h5" gutterBottom>
-                                {questions[currentQuestion]?.question}
-                            </Typography>
-                            <FormControl component="fieldset">
-                                <RadioGroup
-                                    value={selectedAnswers[currentQuestion] ?? ''}
-                                    onChange={handleAnswerChange}
-                                >
-                                    {questions[currentQuestion]?.options.map((option, index) => (
-                                        <FormControlLabel
-                                            key={index}
-                                            value={index}
-                                            control={<Radio />}
-                                            label={option.value}
-                                        />
-                                    ))}
-                                </RadioGroup>
-                            </FormControl>
-                            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-                                <Button
-                                    variant="contained"
-                                    startIcon={<ArrowBack />}
-                                    onClick={handlePrevious}
-                                    disabled={currentQuestion === 0}
-                                >
-                                    Previous
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    onClick={handleClearAnswer}
-                                    disabled={selectedAnswers[currentQuestion] === null}
-                                >
-                                    Clear Answer
-                                </Button>
-                                {currentQuestion === questions.length - 1 ? (
+                            <Grid container>
+                                <Grid size={{xs: 12 }}>
+                                    <Typography variant="h5" gutterBottom>
+                                        {questions[currentQuestion]?.question}
+                                    </Typography>
+                                </Grid>
+                                <Grid size={{xs: 12 }}>
+                                    <FormControl component="fieldset">
+                                        <RadioGroup
+                                            value={selectedAnswers[currentQuestion] ?? ''}
+                                            onChange={handleAnswerChange}
+                                        >
+                                            {questions[currentQuestion]?.options.map((option, index) => (
+                                                <FormControlLabel
+                                                    key={index}
+                                                    value={index}
+                                                    control={<Radio />}
+                                                    label={option.value}
+                                                />
+                                            ))}
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Grid>
+                                <Grid size={{xs: 12}} sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
                                     <Button
                                         variant="contained"
-                                        color="success"
-                                        onClick={handleSubmit}
+                                        startIcon={<ArrowBack />}
+                                        onClick={handlePrevious}
+                                        disabled={currentQuestion === 0}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="secondary"
+                                        onClick={handleClearAnswer}
                                         disabled={selectedAnswers[currentQuestion] === null}
                                     >
-                                        Submit
+                                        Clear Answer
                                     </Button>
-                                ) : (
                                     <Button
                                         variant="contained"
                                         endIcon={<ArrowForward />}
                                         onClick={handleNext}
-                                        disabled={selectedAnswers[currentQuestion] === null}
+                                        disabled={currentQuestion === questions.length-1}
                                     >
                                         Next
                                     </Button>
-                                )}
-                            </Box>
+                                </Grid>
+                            </Grid>
+                            <Grid size={{xs: 12}} sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    sx={{ width: "100%" }}
+                                    onClick={handleSubmit}
+                                    disabled={selectedAnswers.filter(x => x !== null).length!==questions.length}
+                                >
+                                    Submit
+                                </Button>
+                            </Grid>
                         </CardContent>
                     </StyledCard>
                 </Paper>
