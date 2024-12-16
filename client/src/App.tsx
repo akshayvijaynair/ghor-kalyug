@@ -3,37 +3,26 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
-import Header from './Components/Header';
 import Home from './Pages/Home';
+import Register from './Components/Register';
 import theme from './theme';
-import Auth from "./Pages/Auth.tsx";
-import Quiz from "./Pages/Quiz.tsx";
+import Auth from "./Pages/Auth";
+import Quiz from "./Pages/Quiz";
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-            width: '100vw',
-            maxWidth: '100%',
-            overflow: 'hidden',
-            bgcolor: '#FFFFFF'
-          }}
-        >
-          <Header />
-          <Box component="main">
-            <Routes>
-                <Route path="/" element={<Auth />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/home/:id" element={<Quiz />} />
-             {/* <Route path="/register" element={<Register />} /> */}
-            </Routes>
-          </Box>
+        <Box sx={{ minWidth: '100vw',  display: 'flex', 
+          flexDirection: 'column' }}>
+          <Routes>
+            <Route path="/" element={<Auth />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/home/:id" element={<Quiz />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
         </Box>
       </Router>
     </ThemeProvider>
