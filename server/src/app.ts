@@ -42,6 +42,8 @@ app.get("/", async(req, res) => {
 
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
+    console.log('Received generate-quiz request');
+    console.log('Request body:', req.body);
     async function parseQuiz(quizText: string) {
         if (!quizText) {
             throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
