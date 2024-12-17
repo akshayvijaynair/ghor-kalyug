@@ -18,14 +18,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import {
-  Mail,
-  Person,
-  Visibility,
-  VisibilityOff,
-  Lock,
-  ArrowBack,
-} from "@mui/icons-material";
+
+
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -53,10 +47,12 @@ const Register = () => {
 
       setMessage("User successfully registered!");
       setOpenSuccessPopup(true);
+
     } catch (error: any) {
       setMessage(`Error: ${error.message}`);
     }
   };
+
 
   const handleNext = () => {
     if (step < 3) setStep(step + 1);
@@ -382,6 +378,7 @@ const Register = () => {
     </Box>
   );
 };
+
 
 export default Register;
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
@@ -23,21 +23,20 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const auth = getAuth();
-      const db = getFirestore();
-      let email = identifier;
 
-      if (!identifier.includes("@")) {
-        const userDoc = await getDoc(doc(db, "users", identifier));
-        if (!userDoc.exists()) {
-          setError("No account found for this username.");
-          return;
-        }
-        email = userDoc.data().email;
-      }
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const auth = getAuth();
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            setError(null);
+            alert("Login successful!");
+            setTimeout(() => {
+                navigate("/home");
+            }, 5000); // Redirect after 5 seconds
+            // @ts-ignore
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User logged in:", userCredential.user);
@@ -129,6 +128,7 @@ const Login = () => {
             <Typography variant="subtitle2" sx={{ mb: 1, color: '#4B5563' }}>
               Password
             </Typography>
+
             <TextField
               fullWidth
               type={showPassword ? 'text' : 'password'}
@@ -136,6 +136,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -166,6 +167,7 @@ const Login = () => {
                 }
               }}
             />
+
 
             <Button
               type="submit"
