@@ -209,7 +209,7 @@ const Register = () => {
         <LinearProgress
           variant="determinate"
           value={(step / 3) * 100}
-          sx={{ mb: 3, height: 6, borderRadius: 3 }}
+          sx={{ mb: 40, height: 6, borderRadius: 3 }}
         />
         {getStepContent()}
       </Box>
