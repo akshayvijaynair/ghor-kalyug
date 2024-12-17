@@ -1,21 +1,18 @@
-import { QuizRequest, QuizResponse } from '../types/quiz.tsx';
+import {QuizResponse} from '../types/quiz.tsx';
 
 
-export const generateQuiz = async (request: QuizRequest): Promise<QuizResponse> => {
+export const submitQuizAndGetAnswers = async (): Promise<QuizResponse> => {
     const domain = import.meta.env.VITE_API_DOMAIN;
-
     console.log(domain);
-    const endpoint = domain+'/generate-quiz';
-    const idToken = localStorage.getItem('idToken'); 
+    const endpoint = `${domain}/quizzes/`;
 
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
             },
-            body: JSON.stringify(request),
+            body: JSON.stringify({}),
         });
 
         if (!response.ok) {

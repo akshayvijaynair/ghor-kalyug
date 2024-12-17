@@ -9,10 +9,10 @@ Generate ${numQuestions} questions with exactly 4 options based on the topics ab
 Each question MUST have 1 one answer.
 Each question MUST have following format:
     Question ID: Question text?
-        Option 1
-        Option 2
-        Option 3
-        Option 4
+        1
+        2
+        3
+        4
         Answer
 `
 };

@@ -15,6 +15,6 @@
     "skipLibCheck": true,
     "paths": {}
   },
-  "include": ["src"],
+  "include": ["src", "src/**/*.ts","src/*.d.ts"],
   "exclude": ["dist"]
 }
