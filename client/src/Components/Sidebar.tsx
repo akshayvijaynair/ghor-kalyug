@@ -56,8 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             src="/icon.png" // Path to your image
             alt="Logo"
             sx={{
-              width: 48,
-              height: 48,
+              width: 100,
+              height: 100,
               borderRadius: '50%', // Optional: Makes the image circular
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', // Adds a subtle shadow
             }}
