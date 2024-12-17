@@ -12,13 +12,16 @@ import {
   InputLabel,
   Container,
   Alert,
+  AppBar,
+  Toolbar,
+  Avatar,
 } from '@mui/material';
 import { generateQuiz } from '../services/generate-quiz';
 import { QuizRequest } from "../types/quiz";
 import { useNavigate } from "react-router-dom";
-import Header from "../Components/Header";
+import Sidebar from "../Components/Sidebar";
+import Overview from "../Components/Overview";
 
-// Enum to match backend DifficultyLevel
 enum DifficultyLevel {
   ElementarySchool = 1,
   MiddleSchool,
@@ -29,6 +32,7 @@ enum DifficultyLevel {
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
   const [subject, setSubject] = useState('');
   const [difficulty, setDifficulty] = useState<DifficultyLevel>(DifficultyLevel.MiddleSchool);
   const [numQuestions, setNumQuestions] = useState(10);
@@ -37,7 +41,6 @@ const Home: React.FC = () => {
 
   const handleStartQuiz = async () => {
     if (subject.trim()) {
-      console.log('Fetching quiz for subject:', subject);
       setLoading(true);
       setError(null);
 
@@ -48,12 +51,9 @@ const Home: React.FC = () => {
           numQuestions: numQuestions
         };
 
-        console.log("Payload being sent to API:", payload);
         const data = await generateQuiz(payload);
-
         navigate(`/home/${data._id}`);
       } catch (error: any) {
-        console.error('Error generating quiz:', error);
         setError(error.message || 'Failed to generate quiz. Please try again.');
       } finally {
         setLoading(false);
@@ -76,9 +76,12 @@ const Home: React.FC = () => {
     );
   }
 
-  return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#F3F4F6' }}>
-      <Header />
+  const renderContent = () => {
+    if (activeTab === 'overview') {
+      return <Overview />;
+    }
+
+    return (
       <Container maxWidth="md" sx={{ pt: 4, pb: 8 }}>
         <Paper sx={{
           p: 4,
@@ -156,8 +159,8 @@ const Home: React.FC = () => {
               sx={{
                 mt: 2,
                 py: 1.5,
-                bgcolor: 'primary.main',
-                '&:hover': { bgcolor: 'primary.dark' },
+                bgcolor: '#7C4DFF',
+                '&:hover': { bgcolor: '#6B42E0' },
                 fontWeight: 500,
               }}
             >
@@ -166,6 +169,25 @@ const Home: React.FC = () => {
           </Box>
         </Paper>
       </Container>
+    );
+  };
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Box sx={{ flexGrow: 1, ml: '250px' }}>
+        <AppBar position="static" color="transparent" elevation={0}>
+          <Toolbar sx={{ justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography>
+                Good Morning, User
+              </Typography>
+              <Avatar sx={{ bgcolor: '#7C4DFF' }}>U</Avatar>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        {renderContent()}
+      </Box>
     </Box>
   );
 };
