@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Card, CardContent, List, ListItem, ListItemText } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  CircularProgress, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Grid, 
+  Chip, 
+  Avatar, 
+  Badge,
+  Container
+} from '@mui/material';
+import { Gamepad, EmojiEvents } from '@mui/icons-material';
 
 interface Quiz {
   _id: string;
@@ -42,7 +55,7 @@ const RecentQuizzes: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ p:4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
         <CircularProgress />
       </Box>
     );
@@ -50,7 +63,7 @@ const RecentQuizzes: React.FC = () => {
 
   if (error) {
     return (
-      <Box sx={{ p:4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
         <Typography color="error">{error}</Typography>
       </Box>
     );
@@ -58,40 +71,74 @@ const RecentQuizzes: React.FC = () => {
 
   if (!quizzes || quizzes.length === 0) {
     return (
-      <Box sx={{ p:4 }}>
-        <Typography>No recent quizzes found.</Typography>
+        
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
+        <Typography color="textSecondary">No recent quizzes found.</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p:4 }}>
-      <Typography variant="h4" sx={{ mb:2 }}>Recent Quizzes</Typography>
-      {quizzes.map((quiz) => (
-        <Card key={quiz._id} sx={{ mb:2 }}>
-          <CardContent>
-            <Typography variant="h6">{quiz.topics.join(', ')} Quiz</Typography>
-            <Typography variant="body2">
-              Difficulty: {quiz.difficulty}, Questions: {quiz.numQuestions}
-            </Typography>
-            <Typography variant="body2">
-              Created At: {new Date(quiz.createdAt).toLocaleString()}
-            </Typography>
-            <List>
-              {quiz.quiz.map((q, idx) => (
-                <ListItem key={idx}>
-                  <ListItemText 
-                    primary={q.question}
-                    secondary={`Correct Answer: ${q.answer}`} 
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Discover
+        </Typography>
+        <Badge badgeContent={quizzes.length} color="secondary" sx={{ '& .MuiBadge-badge': { fontSize: '0.8rem', height: '22px', minWidth: '22px' } }}>
+          <Chip
+            icon={<EmojiEvents fontSize="small" />}
+            label="Quizzes Completed"
+            variant="outlined"
+          />
+        </Badge>
+      </Box>
+      <Grid container spacing={3}>
+        {quizzes.map((quiz) => (
+          <Grid item xs={12} sm={6} md={4} key={quiz._id}>
+            <Card>
+              <CardHeader
+                title={`${quiz.topics[0]} Quiz`}
+                action={
+                  <Chip
+                    icon={<Gamepad fontSize="small" />}
+                    label={`${quiz.numQuestions} Questions`}
+                    size="small"
                   />
-                </ListItem>
-              ))}
-            </List>
-          </CardContent>
-        </Card>
-      ))}
-    </Box>
+                }
+                sx={{ bgcolor: 'action.hover' }}
+              />
+              <CardContent>
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary">Difficulty</Typography>
+                    <Chip label={quiz.difficulty} size="small" variant="outlined" />
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">Topics</Typography>
+                    <Box>
+                      {quiz.topics.map((topic) => (
+                        <Chip key={topic} label={topic} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                  <Avatar sx={{ width: 32, height: 32, mr: 1 }}>U</Avatar>
+                  <Box>
+                    <Typography variant="body2">Created by You</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(quiz.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
   );
 };
 
 export default RecentQuizzes;
+

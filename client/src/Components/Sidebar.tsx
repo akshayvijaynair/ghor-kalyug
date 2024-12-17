@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               selected={activeTab === 'generate'}
               onClick={() => {
                 onTabChange('generate');
-                navigate('/generate'); // Ensure there's a route for generating quiz
+              
               }}
               sx={{
                 '&.Mui-selected': {

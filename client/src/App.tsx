@@ -8,7 +8,7 @@ import Register from './Components/Register';
 import theme from './theme';
 import Auth from "./Pages/Auth";
 import Quiz from "./Pages/Quiz";
-
+import RecentQuizzes from "./Pages/RecentQuizzes";
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
@@ -22,6 +22,7 @@ const App = () => {
             <Route path="/home/:id" element={<Quiz />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/recent-quizzes" element={<RecentQuizzes />} />
           </Routes>
         </Box>
       </Router>
