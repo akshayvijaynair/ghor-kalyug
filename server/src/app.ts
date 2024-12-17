@@ -164,7 +164,19 @@ import quizResponseSchema from "./schema";
 import getPrompt from "./gemini";
 import quizCollection, { QuizResponseDocument } from "./entity/quizResponseSchema";
 import { ObjectId } from "mongodb"; // Import the db connection here
+import { verifyFirebaseToken } from "./firebaseAuthMiddleware";
 
+import { Request } from 'express';
+import { DecodedIdToken } from 'firebase-admin/auth';
+
+// Extend the Express Request interface
+declare global {
+  namespace Express {
+    interface Request {
+      user?: DecodedIdToken;
+    }
+  }
+}
 dotenv.config();
 
 const app = express();
@@ -200,26 +212,47 @@ app.get("/", async (req, res) => {
 // Function to save quiz details with request metadata
 //@ts-ignore
 async function saveQuiz(
-  quizData: QuizResponseDocument,
-  requestDetails: { topics: string[]; difficulty: string; numQuestions: number }
-): Promise<any> {
-  try {
-    const quizDocument = {
-      ...quizData,
-      topics: requestDetails.topics, // Save topic names
-      difficulty: requestDetails.difficulty, // Save difficulty
-      numQuestions: requestDetails.numQuestions, // Save number of questions
-      createdAt: new Date(), // Timestamp
-    };
-
-    //@ts-ignore
-    const result = await quizCollection.insertOne(quizDocument);
-    return { ...quizDocument, _id: result.insertedId };
-  } catch (error) {
-    console.error("Error saving quiz:", error);
-    throw error;
+    quizData: QuizResponseDocument,
+    requestDetails: { topics: string[]; difficulty: string; numQuestions: number; userId: string }
+  ): Promise<any> {
+    try {
+      const quizDocument = {
+        ...quizData,
+        topics: requestDetails.topics,
+        difficulty: requestDetails.difficulty,
+        numQuestions: requestDetails.numQuestions,
+        userId: requestDetails.userId, // Save the Firebase UID
+        createdAt: new Date(),
+      };
+  
+      const result = await quizCollection.insertOne(quizDocument);
+      return { ...quizDocument, _id: result.insertedId };
+    } catch (error) {
+      console.error("Error saving quiz:", error);
+      throw error;
+    }
   }
-}
+// async function saveQuiz(
+//   quizData: QuizResponseDocument,
+//   requestDetails: { topics: string[]; difficulty: string; numQuestions: number }
+// ): Promise<any> {
+//   try {
+//     const quizDocument = {
+//       ...quizData,
+//       topics: requestDetails.topics, // Save topic names
+//       difficulty: requestDetails.difficulty, // Save difficulty
+//       numQuestions: requestDetails.numQuestions, // Save number of questions
+//       createdAt: new Date(), // Timestamp
+//     };
+
+//     //@ts-ignore
+//     const result = await quizCollection.insertOne(quizDocument);
+//     return { ...quizDocument, _id: result.insertedId };
+//   } catch (error) {
+//     console.error("Error saving quiz:", error);
+//     throw error;
+//   }
+// }
 
 // Function to parse quiz and save to DB
 //@ts-ignore
@@ -245,62 +278,83 @@ async function parseQuiz(quizText: string, requestDetails: any) {
 
 // Endpoint to generate a quiz
 //@ts-ignore
-app.post("/generate-quiz", async (req, res) => {
-  console.log("Received generate-quiz request");
-  const { topics, difficulty, numQuestions } = req.body;
+// 
+app.post("/generate-quiz", verifyFirebaseToken, async (req, res) => {
+    console.log("Received generate-quiz request");
+  
+    const { topics, difficulty, numQuestions } = req.body;
+    const userId = req.user?.uid;
 
-  // Validate input
-  if (!Array.isArray(topics) || !difficulty || !numQuestions) {
-    return res.status(400).json({ error: "Invalid input." });
-  }
-
-  try {
-    const query = {
-      topics: topics, // Match topics
-      difficulty: difficulty, // Match difficulty
-      numQuestions: numQuestions, // Match number of questions
-    };
-
-    // Check if a quiz with the same request details already exists in MongoDB
-    const existingQuiz = await quizCollection.findOne(query);
-
-    if (existingQuiz) {
-      console.log("Returning quiz from MongoDB");
-      return res.status(200).json({
-        _id: existingQuiz._id,
-        quiz: existingQuiz.quiz,
-        source: "mongo", // Indicate the source
-      });
+if (!userId) {
+  return res.status(401).json({ error: "Unauthorized: User ID not found." });
+}
+  
+    // Validate input
+    if (!Array.isArray(topics) || !difficulty || !numQuestions) {
+      return res.status(400).json({ error: "Invalid input." });
     }
-
-    console.log("Generating quiz using Gemini...");
-    const topicString = topics.join(", ");
-    const difficultyLevel = DifficultyLevel[difficulty];
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-8b",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: quizResponseSchema,
-        temperature: 0.1,
-      },
-    });
-
-    // Generate content using Gemini
-    const result = await model.generateContent(getPrompt(topicString, numQuestions, difficultyLevel));
-    const quizContent = result.response.text();
-
-    // Parse and save the new quiz
-    const response = await parseQuiz(quizContent, { topics, difficulty, numQuestions });
-    console.log("Quiz saved to MongoDB");
-
-    res.status(200).json({ ...response, source: "gemini" }); // Indicate the source
-  } catch (error) {
-    console.error("Error generating quiz:", error);
-    res.status(500).json({ error: "Failed to generate quiz. Please try again later." });
-  }
-});
-
+  
+    try {
+      // Check if a similar quiz already exists for this user
+      const query = { topics, difficulty, numQuestions, userId };
+  
+      const existingQuiz = await quizCollection.findOne(query);
+  
+      if (existingQuiz) {
+        console.log(`Returning existing quiz for user: ${userId}`);
+        return res.status(200).json({
+          _id: existingQuiz._id,
+          quiz: existingQuiz.quiz,
+          source: "mongo",
+        });
+      }
+  
+      console.log(`Generating new quiz for user: ${userId}`);
+      const topicString = topics.join(", ");
+      const difficultyLevel = DifficultyLevel[difficulty];
+  
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-8b",
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: quizResponseSchema,
+          temperature: 0.1,
+        },
+      });
+  
+      const result = await model.generateContent(getPrompt(topicString, numQuestions, difficultyLevel));
+      const quizContent = result.response.text();
+  
+      // Save the new quiz to MongoDB with the userId
+      const savedQuiz = await saveQuiz(
+        { quiz: JSON.parse(quizContent) },
+        { topics, difficulty, numQuestions, userId }
+      );
+  
+      console.log(`Quiz saved to MongoDB for user: ${userId}`);
+      res.status(200).json({ _id: savedQuiz._id, quiz: savedQuiz.quiz, source: "gemini" });
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      res.status(500).json({ error: "Failed to generate quiz. Please try again later." });
+    }
+  });
+  //@ts-ignore
+  app.get("/user-quizzes", verifyFirebaseToken, async (req, res) => {
+    const userId = req.user?.uid;
+  
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized: No user ID found." });
+    }
+  
+    try {
+      const quizzes = await quizCollection.find({ userId }).toArray();
+      // Return quizzes sorted by createdAt if you want (add .sort({ createdAt: -1 }) before .toArray())
+      res.status(200).json({ quizzes });
+    } catch (error) {
+      console.error("Error fetching user quizzes:", error);
+      res.status(500).json({ error: "Failed to fetch user quizzes." });
+    }
+  });
 // Endpoint to fetch quiz by ID
 //@ts-ignore
 app.get("/quizzes/:id", async (req, res) => {

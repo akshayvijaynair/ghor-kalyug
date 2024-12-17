@@ -40,37 +40,20 @@ const Register = () => {
     setMessage(null);
 
     try {
-      // Register user in Firebase
-      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
       const user = userCredential.user;
 
-      // Get the Firebase ID token
-      const idToken = await user.getIdToken();
-
-      // Send user data and token to backend
-      const backendUrl = import.meta.env.VITE_API_DOMAIN;
-
-      const response = await fetch(`${backendUrl}/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Pass the ID token for verification
-        },
-        body: JSON.stringify({
-          username: username.trim(),
-          email: email.trim(),
-        }),
+      await setDoc(doc(db, "users", user.uid), {
+        username: username.trim(),
+        email: email.trim(),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Response from backend:", data);
-        setMessage("User successfully registered!");
-        setOpenSuccessPopup(true);
-      } else {
-        throw new Error(data.error || "Failed to register user.");
-      }
+      setMessage("User successfully registered!");
+      setOpenSuccessPopup(true);
     } catch (error: any) {
       setMessage(`Error: ${error.message}`);
     } finally {

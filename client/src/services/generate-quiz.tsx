@@ -6,12 +6,14 @@ export const generateQuiz = async (request: QuizRequest): Promise<QuizResponse> 
 
     console.log(domain);
     const endpoint = domain+'/generate-quiz';
+    const idToken = localStorage.getItem('idToken'); 
 
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify(request),
         });

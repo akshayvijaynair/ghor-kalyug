@@ -32,26 +32,18 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
       const user = userCredential.user;
   
+      setError(null); 
       // Get the ID token
       const idToken = await user.getIdToken();
   
-      // Use the Vite environment variable
-      const backendUrl = import.meta.env.VITE_API_DOMAIN || "http://localhost:8080";
+      // Store the token in localStorage
+      localStorage.setItem('idToken', idToken);
+      console.log("User logged in:", user);
+      console.log("ID Token:", idToken);
   
-      const response = await fetch(`${backendUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ message: "Login successful" }),
-      });
-  
-      const data = await response.json();
-      console.log("Response from backend:", data);
-  
-      setError(null);
+      // Now navigate to home
       navigate("/home");
+  
     } catch (error: any) {
       console.error("Error logging in:", error.message);
       setError("Error logging in: " + error.message);

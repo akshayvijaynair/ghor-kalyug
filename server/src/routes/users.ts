@@ -1,9 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { db } from '../firebaseAdmin'; 
-import admin from '../firebaseAdmin';
 
+import admin from '../firebaseAdmin';
+import db from '../db/connection';
 const router = express.Router();
 // Register Endpoint
+//@ts-ignore
 router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, username } = req.body;
