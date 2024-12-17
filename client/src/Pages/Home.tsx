@@ -3,226 +3,194 @@ import {
   Box,
   Typography,
   Button,
-  CardContent,
+  TextField,
   CircularProgress,
-  Chip,
-  Slider, Paper, Grid2 as Grid,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Container,
+  Alert,
+  AppBar,
+  Toolbar,
+  Avatar,
 } from '@mui/material';
-import { Add, ArrowForward, Delete } from '@mui/icons-material';
-import StyledCard from '../Components/StyledCard';
-import StyledTextField from '../Components/StyledTextField';
 import { generateQuiz } from '../services/generate-quiz';
-import { QuizRequest } from "../types/quiz.tsx";
-import {useNavigate} from "react-router-dom";
+import { QuizRequest } from "../types/quiz";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../Components/Sidebar";
+import Overview from "../Components/Overview";
+
+enum DifficultyLevel {
+  ElementarySchool = 1,
+  MiddleSchool,
+  HighSchool,
+  College,
+  Advanced,
+}
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
   const [subject, setSubject] = useState('');
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [difficulty, setDifficulty] = useState(3);
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>(DifficultyLevel.MiddleSchool);
   const [numQuestions, setNumQuestions] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Disable submit button if there's an error or no subjects
-  const isSubmitDisabled = !!error || subjects.length === 0;
-
-  const handleAddSubject = () => {
-    const trimmedSubject = subject.trim();
-
-    // Check if maximum subjects reached
-    if (subjects.length >= 3) {
-      setError('You can add up to 3 subjects only.');
-      return;
-    }
-
-    // Validation for empty input
-    if (!trimmedSubject) {
-      setError('Subject cannot be empty.');
-      return;
-    }
-
-    // Validation for allowed characters
-    if (!/^[a-zA-Z0-9\s]+$/.test(trimmedSubject)) {
-      setError('Subject can only contain letters, numbers, and spaces.');
-      return;
-    }
-
-    // Validation for maximum length
-    if (trimmedSubject.length > 100) {
-      setError('Subject cannot exceed 100 characters.');
-      return;
-    }
-
-    // Check for duplicates
-    if (subjects.includes(trimmedSubject)) {
-      setError('Subject already added.');
-      return;
-    }
-
-    // If validation passes, add the subject
-    setSubjects([...subjects, trimmedSubject]);
-    setSubject('');
-    setError(null);
-  };
-
-  const handleRemoveSubject = (subjectToRemove: string) => {
-    setSubjects(subjects.filter((sub) => sub !== subjectToRemove));
-    // Clear error if any
-    if (error) setError(null);
-  };
-
   const handleStartQuiz = async () => {
-    if (subjects.length > 0) {
-      console.log('Fetching quiz for subjects:', subjects);
+    if (subject.trim()) {
       setLoading(true);
       setError(null);
+
       try {
         const payload: QuizRequest = {
-          topics: subjects,
-          difficulty: difficulty || 1,
-          numQuestions: numQuestions || 5
+          topics: [subject],
+          difficulty: difficulty,
+          numQuestions: numQuestions
         };
 
         const data = await generateQuiz(payload);
-
         navigate(`/home/${data._id}`);
-      } catch (error) {
-        setError(`Failed to fetch quiz data: ${error}`);
+      } catch (error: any) {
+        setError(error.message || 'Failed to generate quiz. Please try again.');
       } finally {
         setLoading(false);
       }
     } else {
-      setError('Please add at least one subject.');
+      setError('Please enter a subject.');
     }
   };
 
   if (loading) {
     return (
-        <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100vh',
-            }}
-        >
-          <CircularProgress />
-        </Box>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
-  return (
-      <Grid container spacing={2} >
-        <Grid size={{xs: 12, md: 12}}>
-        <Paper elevation={2}
-               sx={{
-                 width: '100%',
-                 display: 'flex',
-                 flexDirection: 'column',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 minHeight: 'calc(100vh - 64px)',
-                 px: 2,
-               }}
-        >
-          <StyledCard elevation={4} sx={{ maxWidth: 600, width: '100%' }}>
-            <CardContent sx={{ p: 4, textAlign: 'center' }}>
-              <Typography
-                  variant="h3"
-                  component="h1"
-                  gutterBottom
-                  fontWeight="bold"
-              >
-                Ghor Kalyug
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                Enter your subjects of interest, choose difficulty, and set the
-                number of questions to get a personalized quiz instantly.
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <StyledTextField
-                    fullWidth
-                    placeholder="Enter subject"
-                    variant="outlined"
-                    value={subject}
-                    // @ts-ignore
-                    onChange={(e) => {
-                      setSubject(e.target.value);
-                      // Clear error when user types
-                      if (error) setError(null);
-                    }}
-                    error={!!error}
-                    helperText={error}
-                    sx={{ flex: 1 }}
-                />
-                <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<Add />}
-                    onClick={handleAddSubject}
-                    disabled={subjects.length >= 3}
-                >
-                  Add
-                </Button>
-              </Box>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 4 }}>
-                {subjects.map((sub) => (
-                    <Chip
-                        key={sub}
-                        label={sub}
-                        onDelete={() => handleRemoveSubject(sub)}
-                        deleteIcon={<Delete />}
-                        color="primary"
-                    />
-                ))}
-              </Box>
-              <Typography gutterBottom>Difficulty Level</Typography>
-              <Slider
-                  value={difficulty}
-                  onChange={(_, newValue) => setDifficulty(newValue as number)}
-                  step={1}
-                  marks
-                  min={1}
-                  max={5}
-                  valueLabelDisplay="on"
-                  sx={{ mb: 4 }}
-              />
-              <Typography gutterBottom>Number of Questions</Typography>
-              <Slider
-                  value={numQuestions}
-                  onChange={(_, newValue) => setNumQuestions(newValue as number)}
-                  step={1}
-                  marks
-                  min={5}
-                  max={20}
-                  valueLabelDisplay="on"
-                  sx={{ mb: 4 }}
-              />
-              <Button
-                  variant="contained"
-                  size="large"
-                  endIcon={<ArrowForward />}
-                  onClick={handleStartQuiz}
-                  sx={{
-                    minWidth: 200,
-                    py: 1.5,
-                    backgroundColor: 'primary.main',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                    },
-                  }}
-                  disabled={isSubmitDisabled}
-              >
-                Start Quiz
-              </Button>
-            </CardContent>
-          </StyledCard>
-        </Paper>
-        </Grid>
-      </Grid>
+  const renderContent = () => {
+    if (activeTab === 'overview') {
+      return <Overview />;
+    }
 
+    return (
+      <Container maxWidth="md" sx={{ pt: 4, pb: 8 }}>
+        <Paper sx={{
+          p: 4,
+          borderRadius: 2,
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)'
+        }}>
+          <Typography variant="h4" sx={{ mb: 4, fontWeight: 600 }}>
+            Create Quiz
+          </Typography>
+
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <TextField
+              fullWidth
+              label="Enter Subject"
+              value={subject}
+              onChange={(e) => {
+                setSubject(e.target.value);
+                if (error) setError(null);
+              }}
+              error={!!error}
+              helperText={error}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: '#F9FAFB',
+                }
+              }}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Difficulty Level</InputLabel>
+              <Select
+                value={difficulty}
+                label="Difficulty Level"
+                onChange={(e) => setDifficulty(Number(e.target.value))}
+                sx={{
+                  bgcolor: '#F9FAFB',
+                }}
+              >
+                <MenuItem value={DifficultyLevel.ElementarySchool}>Elementary School</MenuItem>
+                <MenuItem value={DifficultyLevel.MiddleSchool}>Middle School</MenuItem>
+                <MenuItem value={DifficultyLevel.HighSchool}>High School</MenuItem>
+                <MenuItem value={DifficultyLevel.College}>College</MenuItem>
+                <MenuItem value={DifficultyLevel.Advanced}>Advanced</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Number of Questions</InputLabel>
+              <Select
+                value={numQuestions}
+                label="Number of Questions"
+                onChange={(e) => setNumQuestions(Number(e.target.value))}
+                sx={{
+                  bgcolor: '#F9FAFB',
+                }}
+              >
+                {[5, 10, 15, 20].map((num) => (
+                  <MenuItem key={num} value={num}>
+                    {num} Questions
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleStartQuiz}
+              sx={{
+                mt: 2,
+                py: 1.5,
+                bgcolor: '#7C4DFF',
+                '&:hover': { bgcolor: '#6B42E0' },
+                fontWeight: 500,
+              }}
+            >
+              Next Step
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    );
+  };
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Box sx={{ flexGrow: 1, ml: '250px' }}>
+        <AppBar position="static" color="transparent" elevation={0}>
+          <Toolbar sx={{ justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography>
+                Good Morning, User
+              </Typography>
+              <Avatar sx={{ bgcolor: '#7C4DFF' }}>U</Avatar>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        {renderContent()}
+      </Box>
+    </Box>
   );
 };
 
 export default Home;
+

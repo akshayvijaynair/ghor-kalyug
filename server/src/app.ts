@@ -14,11 +14,14 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN,
-    optionsSuccessStatus: 200
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+    optionsSuccessStatus: 200, // For legacy browser support
 };
 
 app.use(cors(corsOptions));
+
 
 
 if (!process.env.API_KEY) {
@@ -42,6 +45,8 @@ app.get("/", async(req, res) => {
 
 // @ts-ignore
 app.post("/generate-quiz", async (req, res) => {
+    console.log('Received generate-quiz request');
+    console.log('Request body:', req.body);
     async function parseQuiz(quizText: string) {
         if (!quizText) {
             throw new Error(`Invalid quiz text received for parsing: ${quizText}`);
