@@ -51,7 +51,12 @@ const Register = () => {
         username: username.trim(),
         email: email.trim(),
       });
-
+      const idToken = await user.getIdToken();
+  
+      // Store the token in localStorage
+      localStorage.setItem('idToken', idToken);
+      console.log("User logged in:", user);
+      console.log("ID Token:", idToken);
       setMessage("User successfully registered!");
       setOpenSuccessPopup(true);
     } catch (error: any) {
