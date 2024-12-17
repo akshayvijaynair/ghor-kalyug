@@ -8,7 +8,7 @@ import {
 
 const Overview: React.FC = () => {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 40 }}>
       <Typography variant="h4" sx={{ mb: 4 }}>
         Overview
       </Typography>
