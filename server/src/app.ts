@@ -255,9 +255,28 @@ app.post("/generate-quiz", async (req, res) => {
   }
 
   try {
+    const query = {
+      topics: topics, // Match topics
+      difficulty: difficulty, // Match difficulty
+      numQuestions: numQuestions, // Match number of questions
+    };
+
+    // Check if a quiz with the same request details already exists in MongoDB
+    const existingQuiz = await quizCollection.findOne(query);
+
+    if (existingQuiz) {
+      console.log("Returning quiz from MongoDB");
+      return res.status(200).json({
+        _id: existingQuiz._id,
+        quiz: existingQuiz.quiz,
+        source: "mongo", // Indicate the source
+      });
+    }
+
+    console.log("Generating quiz using Gemini...");
     const topicString = topics.join(", ");
-    //@ts-ignore
     const difficultyLevel = DifficultyLevel[difficulty];
+
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash-8b",
       generationConfig: {
@@ -267,14 +286,15 @@ app.post("/generate-quiz", async (req, res) => {
       },
     });
 
-    // Generate content
-    //@ts-ignore
+    // Generate content using Gemini
     const result = await model.generateContent(getPrompt(topicString, numQuestions, difficultyLevel));
     const quizContent = result.response.text();
 
-    // Parse and save quiz
+    // Parse and save the new quiz
     const response = await parseQuiz(quizContent, { topics, difficulty, numQuestions });
-    res.status(200).json(response);
+    console.log("Quiz saved to MongoDB");
+
+    res.status(200).json({ ...response, source: "gemini" }); // Indicate the source
   } catch (error) {
     console.error("Error generating quiz:", error);
     res.status(500).json({ error: "Failed to generate quiz. Please try again later." });
