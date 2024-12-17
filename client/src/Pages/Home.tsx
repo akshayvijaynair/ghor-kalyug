@@ -42,17 +42,15 @@ const Home: React.FC = () => {
       setError(null);
 
       try {
-        // Prepare the payload for the API
         const payload: QuizRequest = {
-          topics: [subject], // Subject entered by the user
-          difficulty: difficulty, // Numeric difficulty value from enum
-          numQuestions: numQuestions // Number of questions
+          topics: [subject],
+          difficulty: difficulty,
+          numQuestions: numQuestions
         };
 
-        console.log("Payload being sent to API:", payload); // Debugging the payload
+        console.log("Payload being sent to API:", payload);
         const data = await generateQuiz(payload);
 
-        // Navigate to the quiz page with the generated quiz ID
         navigate(`/home/${data._id}`);
       } catch (error: any) {
         console.error('Error generating quiz:', error);
@@ -92,7 +90,6 @@ const Home: React.FC = () => {
           </Typography>
 
           <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Subject Input */}
             <TextField
               fullWidth
               label="Enter Subject"
@@ -110,7 +107,6 @@ const Home: React.FC = () => {
               }}
             />
 
-            {/* Difficulty Level Dropdown */}
             <FormControl fullWidth>
               <InputLabel>Difficulty Level</InputLabel>
               <Select
@@ -129,7 +125,6 @@ const Home: React.FC = () => {
               </Select>
             </FormControl>
 
-            {/* Number of Questions Dropdown */}
             <FormControl fullWidth>
               <InputLabel>Number of Questions</InputLabel>
               <Select
@@ -148,14 +143,12 @@ const Home: React.FC = () => {
               </Select>
             </FormControl>
 
-            {/* Error Alert */}
             {error && (
               <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
                 {error}
               </Alert>
             )}
 
-            {/* Submit Button */}
             <Button
               variant="contained"
               size="large"
@@ -178,3 +171,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
