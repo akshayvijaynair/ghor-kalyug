@@ -355,6 +355,29 @@ if (!userId) {
       res.status(500).json({ error: "Failed to fetch user quizzes." });
     }
   });
+
+//Fetch all quizzes for the user, including correct answers and explanations
+//@ts-ignore
+  app.get("/user-quizzes-full", verifyFirebaseToken, async (req, res) => {
+    const userId = req.user?.uid;
+  
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized: No user ID found." });
+    }
+  
+    try {
+      // Fetch all quizzes for the user
+      const quizzes = await quizCollection.find({ userId }).sort({ createdAt: -1 }).toArray();
+  
+      // Return the quizzes as-is, including correct answers and explanations
+      res.status(200).json({ quizzes });
+    } catch (error) {
+      console.error("Error fetching full user quizzes:", error);
+      res.status(500).json({ error: "Failed to fetch user quizzes with corrected answers." });
+    }
+  });
+
+
 // Endpoint to fetch quiz by ID
 //@ts-ignore
 app.get("/quizzes/:id", async (req, res) => {

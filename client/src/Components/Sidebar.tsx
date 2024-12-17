@@ -12,6 +12,7 @@ import {
 import HomeIcon from '@mui/icons-material/Home';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HistoryIcon from '@mui/icons-material/History';
 import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
@@ -58,8 +59,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             sx={{
               width: 100,
               height: 100,
-              borderRadius: '50%', // Optional: Makes the image circular
-              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', // Adds a subtle shadow
+              borderRadius: '50%',
+              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
             }}
           />
         </Box>
@@ -68,7 +69,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
           <ListItem disablePadding>
             <ListItemButton
               selected={activeTab === 'overview'}
-              onClick={() => onTabChange('overview')}
+              onClick={() => {
+                onTabChange('overview');
+                navigate('/home'); // Ensure we navigate to `/home` for overview
+              }}
               sx={{
                 '&.Mui-selected': {
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
@@ -84,10 +88,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               <ListItemText primary="Overview" />
             </ListItemButton>
           </ListItem>
+
           <ListItem disablePadding>
             <ListItemButton
               selected={activeTab === 'generate'}
-              onClick={() => onTabChange('generate')}
+              onClick={() => {
+                onTabChange('generate');
+                navigate('/generate'); // Ensure there's a route for generating quiz
+              }}
               sx={{
                 '&.Mui-selected': {
                   bgcolor: 'rgba(255, 255, 255, 0.1)',
@@ -101,6 +109,30 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
                 <AddCircleIcon />
               </ListItemIcon>
               <ListItemText primary="Generate Quiz" />
+            </ListItemButton>
+          </ListItem>
+
+          {/* New Recent Quizzes Tab */}
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={activeTab === 'recentQuizzes'}
+              onClick={() => {
+                onTabChange('recentQuizzes');
+                navigate('/recent-quizzes'); // We'll define this route below
+              }}
+              sx={{
+                '&.Mui-selected': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                },
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.05)',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white' }}>
+                <HistoryIcon />
+              </ListItemIcon>
+              <ListItemText primary="Recent Quizzes" />
             </ListItemButton>
           </ListItem>
         </List>
