@@ -1,333 +1,215 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Typography,
     Button,
-    Card,
-    CardContent,
-    Radio,
+    FormControl,
     RadioGroup,
     FormControlLabel,
-    FormControl,
+    Radio,
     LinearProgress,
-    Grid2 as Grid, Paper,
-} from '@mui/material';
-import {ArrowBack, ArrowForward} from '@mui/icons-material';
-import {styled} from '@mui/material/styles';
-import {Question} from "../types/quiz.tsx";
-import {useParams} from "react-router-dom";
-import {getQuiz} from "../services/get-quiz.tsx";
-import {QRCodeCanvas} from "qrcode.react";
+    Paper,
+    IconButton,
+    Tooltip,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { useParams, useNavigate } from "react-router-dom";
+import { getQuiz } from "../services/get-quiz";
+import { QRCodeCanvas } from "qrcode.react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckIcon from "@mui/icons-material/Check";
 
-const StyledCard = styled(Card)(({theme}) => ({
+const StyledPaper = styled(Paper)(({ theme }) => ({
     background: theme.palette.background.paper,
-    maxWidth: '800px',
-    width: '100%',
-    marginTop: theme.spacing(4),
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: "12px",
+    width: "100%",
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+    padding: theme.spacing(3),
 }));
 
-const ProgressButton = styled(Button)<{ completed?: boolean }>(({theme, completed}) => ({
-    minWidth: '40px',
-    width: '40px',
-    height: '40px',
-    padding: 0,
-    borderRadius: '50%',
-    backgroundColor: completed ? theme.palette.primary.main : theme.palette.grey[300],
-    color: completed ? theme.palette.primary.contrastText : "000000",
-    fontSize: '18px',
-    '&:hover': {
-        backgroundColor: completed ? theme.palette.primary.dark : theme.palette.grey[400],
+const QuestionIndicator = styled(IconButton)<{ completed?: boolean }>(({ theme, completed }) => ({
+    width: "35px",
+    height: "35px",
+    borderRadius: "50%",
+    margin: theme.spacing(0.5),
+    color: completed ? theme.palette.primary.contrastText : theme.palette.text.primary,
+    backgroundColor: completed ? theme.palette.primary.main : theme.palette.grey[200],
+    "&:hover": {
+        backgroundColor: completed ? theme.palette.primary.dark : theme.palette.grey[300],
     },
 }));
 
 const Quiz: React.FC = () => {
-    const {id} = useParams();
+    const { id } = useParams();
+    const navigate = useNavigate();
     const url = import.meta.env.VITE_DOMAIN + "/home/" + id;
-    const [questions, setQuestions] = useState<Question[]>([]);
+
+    const [questions, setQuestions] = useState<any[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<(string | null)[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState<number | null>(null);
+    const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes
 
     useEffect(() => {
-        // Initialize the selected answers array to match the length of questions
-        if (questions) {
+        if (id) getQuiz(id).then((r) => setQuestions(r.quiz));
+    }, [id]);
+
+    useEffect(() => {
+        if (questions.length > 0) {
             setSelectedAnswers(new Array(questions.length).fill(null));
         }
     }, [questions]);
 
     useEffect(() => {
-        if (id) {
-            getQuiz(id).then((r) => setQuestions(r.quiz));
-        }
-    }, [id]);
+        const timer = setInterval(() => {
+            setTimeRemaining((prev) => {
+                if (prev <= 0) {
+                    clearInterval(timer);
+                    handleSubmit();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newSelectedAnswers = [...selectedAnswers];
-        newSelectedAnswers[currentQuestion] = event.target.value;
-        setSelectedAnswers(newSelectedAnswers);
+        const newAnswers = [...selectedAnswers];
+        newAnswers[currentQuestion] = event.target.value;
+        setSelectedAnswers(newAnswers);
     };
 
-    const handleClearAnswer = () => {
-        const newSelectedAnswers = [...selectedAnswers];
-        newSelectedAnswers[currentQuestion] = null; // Reset the current question's answer
-        setSelectedAnswers(newSelectedAnswers);
+    const handleSubmit = () => {
+        const correctAnswers = questions.map((q) => q.answer);
+        const score = selectedAnswers.filter((ans, idx) => ans === correctAnswers[idx]).length;
+        setScore(score);
+        setIsSubmitted(true);
     };
 
-    const handleNext = () => {
-        setCurrentQuestion((prev) => Math.min(prev + 1, questions.length - 1));
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
-
-    const handlePrevious = () => {
-        setCurrentQuestion((prev) => Math.max(prev - 1, 0));
-    };
-
-    const handleJumpToQuestion = (index: number) => {
-        setCurrentQuestion(index);
-    };
-
-    const handleSubmit = async () => {
-        try {
-            const correctAnswers = questions.map((q: Question) => q.answer);
-            let correctCount = 0;
-
-            for (let i = 0; i < questions.length; i++) {
-                const userSelectedOptionIndex = selectedAnswers[i];
-                if (userSelectedOptionIndex !== null) {
-                    if (selectedAnswers[i] === correctAnswers[i]) {
-                        correctCount++;
-                    }
-                }
-            }
-
-            setScore(correctCount);
-            setIsSubmitted(true);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error("Error verifying answers:", error.message);
-            } else {
-                console.error("Error verifying answers:", error);
-            }
-            alert("An error occurred while fetching the quiz. Please try again.");
-        }
-    };
-
-
-    if (questions.length === 0) {
-        return <Typography>Loading...</Typography>;
-    }
-
-    // If submitted, display the result
-    if (isSubmitted && score !== null) {
-        return (
-            <Grid
-                container
-                spacing={2}
-                sx={{
-                    padding: {xs: 2, md: 5},
-                }}
-            >
-                {/* Progress Section */}
-                <Grid size={{xs: 12, md: 12, lg: 12}}>
-                    <Paper
-                        elevation={2}
-                        sx={{
-                            width: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'}, // Adjust height
-                            padding: {xs: 2, md: 3},
-                        }}
-                    >
-                        <Typography variant="h1" gutterBottom>
-                            Quiz Completed!
-                        </Typography>
-                        <Typography variant="h3">
-                            Your Score: {score} / {questions.length}
-                        </Typography>
-                    </Paper>
-                </Grid>
-            </Grid>
-        );
-    }
 
     return (
-        <Grid
-            container
-            spacing={2}
-            sx={{
-                padding: {xs: 2, md: 5},
-            }}
-        >
-            {/* Progress Section */}
-            <Grid size={{xs: 12, md: 3, lg: 3}}>
-                <Paper
-                    elevation={2}
-                    sx={{
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'}, // Adjust height
-                        padding: {xs: 2, md: 3},
-                    }}
-                >
-                    <Box>
-                        <Typography variant="h6" sx={{p: 2}}>
-                            Progress
-                            <LinearProgress
-                                variant="determinate"
-                                value={(selectedAnswers.filter((a) => a !== null).length / questions.length) * 100}
-                                sx={{mb: 1}}
-                            />
-                            <Typography variant="body2">
-                                {selectedAnswers.filter((a) => a !== null).length} of {questions.length} answered
-                            </Typography>
-                        </Typography>
-                        <Grid container spacing={1}>
-                            {questions.map((_, index) => (
-                                <Grid size={{xs: 1}} sx={{m: 2}} key={index}>
-                                    <ProgressButton
-                                        onClick={() => handleJumpToQuestion(index)}
-                                        completed={selectedAnswers[index] !== null}
-                                    >
-                                        {index + 1}
-                                    </ProgressButton>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                </Paper>
-            </Grid>
+        <Box sx={{ bgcolor: "#8C7AE6", minHeight: "100vh", p: 3 }}>
+            {/* Header */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mt={6}>
+                <Typography variant="h5" color="#FFF" fontWeight="bold">
+                    Ghor Kalyug
+                </Typography>
+                <QRCodeCanvas value={url} size={70} />
+            </Box>
 
-            {/* Question Section */}
-            <Grid size={{xs: 12, md: 5, lg: 6}}>
-                <Paper
-                    elevation={2}
-                    sx={{
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'},
-                        marginLeft: {xs: 0, md: 2},
-                        padding: {xs: 2, md: 4},
-                    }}
-                >
-                    <StyledCard elevation={4}>
-                        <CardContent>
-                            <Grid container>
-                                <Grid size={{xs: 12}}>
-                                    <Typography variant="h5" gutterBottom>
-                                        {questions[currentQuestion]?.question}
-                                    </Typography>
-                                </Grid>
-                                <Grid size={{xs: 12}}>
-                                    <FormControl component="fieldset">
-                                        <RadioGroup
-                                            value={selectedAnswers[currentQuestion] ?? ''}
-                                            onChange={handleAnswerChange}
-                                        >
-                                            {questions[currentQuestion]?.options.map((option, index) => (
-                                                <FormControlLabel
-                                                    key={index}
-                                                    value={option.key}
-                                                    control={<Radio/>}
-                                                    label={option.value}
-                                                />
-                                            ))}
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-                                <Grid size={{xs: 12}} sx={{mt: 4, display: 'flex', justifyContent: 'space-between'}}>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<ArrowBack/>}
-                                        onClick={handlePrevious}
-                                        disabled={currentQuestion === 0}
-                                    >
-                                        Previous
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        color="secondary"
-                                        onClick={handleClearAnswer}
-                                        disabled={selectedAnswers[currentQuestion] === null}
-                                    >
-                                        Clear Answer
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        endIcon={<ArrowForward/>}
-                                        onClick={handleNext}
-                                        disabled={currentQuestion === questions.length - 1}
-                                    >
-                                        Next
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            <Grid size={{xs: 12}} sx={{mt: 4, display: 'flex', justifyContent: 'space-between'}}>
+            <StyledPaper sx={{ mt: 8, mx: "auto", maxWidth: 800 }}>
+                {/* Timer and Progress */}
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Typography color="text.primary" fontWeight="bold">
+                        Time Remaining: <span style={{ color: "#555" }}>{formatTime(timeRemaining)}</span>
+                    </Typography>
+                    <Typography color="text.secondary" fontWeight="bold">
+                        Progress: {currentQuestion + 1}/{questions.length}
+                    </Typography>
+                </Box>
+                <LinearProgress
+                    variant="determinate"
+                    value={((currentQuestion + 1) / questions.length) * 100}
+                    sx={{ height: 8, borderRadius: 4, mb: 2 }}
+                />
+
+                {/* Questions */}
+                {!isSubmitted && questions.length > 0 && (
+                    <>
+                        <Typography variant="h6" fontWeight="bold" mb={2}>
+                            Question {currentQuestion + 1} of {questions.length}
+                        </Typography>
+                        <Typography variant="h5" mb={3}>
+                            {questions[currentQuestion].question}
+                        </Typography>
+
+                        <FormControl component="fieldset" fullWidth>
+                            <RadioGroup
+                                value={selectedAnswers[currentQuestion] ?? ""}
+                                onChange={handleAnswerChange}
+                            >
+                                {questions[currentQuestion].options.map((option: any, idx: number) => (
+                                    <FormControlLabel
+                                        key={idx}
+                                        value={option.key}
+                                        control={<Radio />}
+                                        label={option.value}
+                                        sx={{
+                                            mb: 1,
+                                            border: "1px solid #E5E7EB",
+                                            borderRadius: "8px",
+                                            px: 2,
+                                            py: 1,
+                                            backgroundColor:
+                                                selectedAnswers[currentQuestion] === option.key
+                                                    ? "#E0E7FF"
+                                                    : "#FFF",
+                                        }}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        </FormControl>
+
+                        {/* Navigation */}
+                        <Box display="flex" justifyContent="space-between" mt={4}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<ArrowBackIcon />}
+                                onClick={() => setCurrentQuestion(currentQuestion - 1)}
+                                disabled={currentQuestion === 0}
+                            >
+                                Previous
+                            </Button>
+                            {currentQuestion === questions.length - 1 ? (
                                 <Button
                                     variant="contained"
                                     color="success"
-                                    sx={{width: "100%"}}
                                     onClick={handleSubmit}
-                                    disabled={selectedAnswers.filter(x => x !== null).length !== questions.length}
+                                    disabled={selectedAnswers.includes(null)}
                                 >
-                                    Submit
+                                    Submit Quiz
                                 </Button>
-                            </Grid>
-                        </CardContent>
-                    </StyledCard>
-                </Paper>
-            </Grid>
+                            ) : (
+                                <Button
+                                    variant="outlined"
+                                    endIcon={<ArrowForwardIcon />}
+                                    onClick={() => setCurrentQuestion(currentQuestion + 1)}
+                                >
+                                    Next
+                                </Button>
+                            )}
+                        </Box>
+                    </>
+                )}
 
-            {/* Share Section */}
-            <Grid size={{xs: 12, md: 4, lg: 3}}>
-                <Paper
-                    elevation={2}
-                    sx={{
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: {xs: 'auto', md: 'calc(100vh - 150px)'},
-                        marginLeft: {xs: 0, md: 4},
-                        padding: {xs: 2, md: 3},
-                    }}
-                >
-                    <Typography variant="h6" gutterBottom>
-                        Like this Quiz? Share it with your friends
-                    </Typography>
-                    <Box
-                        sx={{
-                            width: {xs: 128, md: 256},
-                            height: {xs: 128, md: 256},
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <QRCodeCanvas
-                            value={url}
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
-                            }}
-                        />
+                {/* Score Display */}
+                {isSubmitted && (
+                    <Box textAlign="center">
+                        <Typography variant="h4" fontWeight="bold" color="primary" mb={2}>
+                            Quiz Completed!
+                        </Typography>
+                        <Typography variant="h5" mb={3}>
+                            Your Score: {score} / {questions.length}
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate("/home")}
+                        >
+                            Home
+                        </Button>
                     </Box>
-                </Paper>
-            </Grid>
-        </Grid>
-
+                )}
+            </StyledPaper>
+        </Box>
     );
 };
 
