@@ -33,14 +33,10 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
       const user = userCredential.user;
   
-      console.log("User logged in:", user);
       setError(null); 
-      alert("Login successful!");
-  
-  
-      setTimeout(() => {
-        navigate("/home");
-      }, 2000); // Redirect after 2 seconds
+   
+      navigate("/home");
+
     } catch (error: any) {
       console.error("Error logging in:", error.message);
       setError("Error logging in: " + error.message);
