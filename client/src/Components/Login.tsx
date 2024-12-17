@@ -24,24 +24,23 @@ const Login = () => {
   const navigate = useNavigate();
 
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const auth = getAuth();
-
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            setError(null);
-            alert("Login successful!");
-            setTimeout(() => {
-                navigate("/home");
-            }, 5000); // Redirect after 5 seconds
-            // @ts-ignore
-
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("User logged in:", userCredential.user);
-      setError(null);
-      navigate("/home");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const auth = getAuth();
+  
+    try {
+      
+      const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
+      const user = userCredential.user;
+  
+      console.log("User logged in:", user);
+      setError(null); 
+      alert("Login successful!");
+  
+  
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000); // Redirect after 2 seconds
     } catch (error: any) {
       console.error("Error logging in:", error.message);
       setError("Error logging in: " + error.message);
