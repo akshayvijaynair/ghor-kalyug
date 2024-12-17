@@ -84,7 +84,7 @@ const Home: React.FC = () => {
     return (
       <Container maxWidth="md" sx={{ pt: 4, pb: 8 }}>
         <Paper sx={{
-          p: 4,
+          p: 20,
           borderRadius: 2,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)'
         }}>
@@ -180,7 +180,7 @@ const Home: React.FC = () => {
           <Toolbar sx={{ justifyContent: 'flex-end' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography>
-                Good Morning, User
+                Good Morning
               </Typography>
               <Avatar sx={{ bgcolor: '#7C4DFF' }}>U</Avatar>
             </Box>

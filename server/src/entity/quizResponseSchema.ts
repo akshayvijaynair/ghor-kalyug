@@ -16,6 +16,11 @@ export interface Question {
 
 export interface QuizResponseDocument {
     quiz: Question[];
+    topics?: string[];          // Optional fields
+    difficulty?: string;
+    numQuestions?: number;
+    requestDetails?: object;
+    createdAt?: Date;
 }
 
 // Access the `quizzes` collection

@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
     optionsSuccessStatus: 200, // For legacy browser support
