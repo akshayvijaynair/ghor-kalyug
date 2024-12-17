@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Box,

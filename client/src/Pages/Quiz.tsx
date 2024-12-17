@@ -9,8 +9,6 @@ import {
     Radio,
     LinearProgress,
     Paper,
-    IconButton,
-    Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useParams, useNavigate } from "react-router-dom";
@@ -18,7 +16,7 @@ import { getQuiz } from "../services/get-quiz";
 import { QRCodeCanvas } from "qrcode.react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CheckIcon from "@mui/icons-material/Check";
+
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
     background: theme.palette.background.paper,
@@ -28,17 +26,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(3),
 }));
 
-const QuestionIndicator = styled(IconButton)<{ completed?: boolean }>(({ theme, completed }) => ({
-    width: "35px",
-    height: "35px",
-    borderRadius: "50%",
-    margin: theme.spacing(0.5),
-    color: completed ? theme.palette.primary.contrastText : theme.palette.text.primary,
-    backgroundColor: completed ? theme.palette.primary.main : theme.palette.grey[200],
-    "&:hover": {
-        backgroundColor: completed ? theme.palette.primary.dark : theme.palette.grey[300],
-    },
-}));
+
 
 const Quiz: React.FC = () => {
     const { id } = useParams();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { app } from "../firebaseConfig";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'; 
 import {
   Box,
   TextField,

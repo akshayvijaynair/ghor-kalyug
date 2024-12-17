@@ -8,7 +8,6 @@ import {
   CardHeader,
   Grid,
   Chip,
-  Avatar,
   Modal,
   Divider,
   Button,
@@ -18,9 +17,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Paper,
 } from '@mui/material';
-import { Gamepad, EmojiEvents, School, CheckCircle, Cancel } from '@mui/icons-material';
+import { Gamepad, EmojiEvents} from '@mui/icons-material';
 import Sidebar from '../Components/Sidebar';
 
 interface Quiz {
