@@ -40,4 +40,4 @@ router.post('/register', async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 });
-export default router;
+export default router;

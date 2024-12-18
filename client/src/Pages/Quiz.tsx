@@ -31,7 +31,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 const Quiz: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const url = import.meta.env.VITE_DOMAIN + "/home/" + id;
+    const url = import.meta.env.VITE_API_DOMAIN + "/home/" + id;
 
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
